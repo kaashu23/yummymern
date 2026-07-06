@@ -122,3 +122,6 @@ dist
 *.njsproj
 *.sln
 *.sw?
+
+
+.yummy_mern_project_plan.txt

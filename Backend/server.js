@@ -37,6 +37,7 @@ app.use('/api/chefs', require('./routes/chefRoutes'));
 app.use('/api/gallery', require('./routes/galleryRoutes'));
 app.use('/api/testimonials', require('./routes/testimonialRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 app.get('/', (req, res) => {
   res.send('Yummy API is running...');

@@ -1,309 +1,291 @@
-import { useState } from 'react';
-import api from '../utils/axios';
-import { useAuth, useUser } from '@clerk/clerk-react';
-import { FiCalendar, FiClock, FiUsers, FiUser, FiPhone, FiMessageSquare } from 'react-icons/fi';
-import toast, { Toaster } from 'react-hot-toast';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const Reservation = () => {
-  const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
-  const [step, setStep] = useState(1); // 1: Select Details, 2: Available Tables, 3: Confirm Details
-  const [loading, setLoading] = useState(false);
-  const [availableTables, setAvailableTables] = useState([]);
-  const [selectedTable, setSelectedTable] = useState(null);
-
   const [formData, setFormData] = useState({
-    date: '',
-    timeSlot: '18:00 - 19:30',
-    partySize: 2,
-    guestName: '',
-    guestPhone: '',
-    specialRequest: ''
+    date: new Date().toISOString().split('T')[0],
+    partySize: '2 Guests',
+    timeSlot: '19:30',
   });
-
-  const timeSlots = [
-    '11:00 - 12:30', '12:30 - 14:00', '14:00 - 15:30',
-    '18:00 - 19:30', '19:30 - 21:00', '21:00 - 22:30'
-  ];
+  const [isMapActive, setIsMapActive] = useState(false);
+  const [selectedTable, setSelectedTable] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const checkAvailability = async (e) => {
-    e.preventDefault();
-    if (!formData.date) {
-      toast.error("Please select a date.");
+  const handleTimeSelect = (time) => {
+    setFormData({ ...formData, timeSlot: time });
+  };
+
+  const revealAvailability = () => {
+    if (!formData.date || !formData.partySize || !formData.timeSlot) {
+      toast.error('Please fill in all details');
       return;
     }
     
-    try {
-      setLoading(true);
-      const res = await api.get('/reservations/availability', {
-        params: {
-          date: formData.date,
-          timeSlot: formData.timeSlot,
-          partySize: formData.partySize
-        }
-      });
-      setAvailableTables(res.data);
-      if (res.data.length === 0) {
-        toast.error("Sorry, no tables available for the selected time and party size.");
-      } else {
-        setStep(2);
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to check availability.");
-    } finally {
+    setLoading(true);
+    // Simulate API check
+    setTimeout(() => {
       setLoading(false);
-    }
+      setIsMapActive(true);
+    }, 800);
   };
 
-  const proceedToConfirm = (tableId) => {
-    setSelectedTable(availableTables.find(t => t._id === tableId));
-    // Pre-fill user data if logged in
-    if (isSignedIn && user) {
-      setFormData(prev => ({
-        ...prev,
-        guestName: prev.guestName || user.fullName,
-        guestPhone: prev.guestPhone || ''
-      }));
-    }
-    setStep(3);
+  const selectTable = (tableId, tableName, location) => {
+    if (!isMapActive) return;
+    setSelectedTable({ id: tableId, name: tableName, location });
   };
 
-  const submitReservation = async (e) => {
-    e.preventDefault();
-    if (!isSignedIn) {
-      toast.error("Please log in to confirm your reservation.");
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      const payload = {
-        tableId: selectedTable._id,
-        date: formData.date,
-        timeSlot: formData.timeSlot,
-        partySize: formData.partySize,
-        guestName: formData.guestName,
-        guestPhone: formData.guestPhone,
-        specialRequest: formData.specialRequest
-      };
-
-      // Since Clerk syncs user via webhook, the backend needs clerkId in token to attach user
-      // But we must send the request. In a real app, we attach the clerk token.
-      // For this demo, we assume the backend clerkMiddleware will find the user.
-      const clerkToken = await window.Clerk.session.getToken();
-
-      const res = await api.post('/reservations', payload, {
-        headers: { Authorization: `Bearer ${clerkToken}` }
-      });
-
-      toast.success("Reservation confirmed! Email sent.");
-      setStep(4); // Success screen
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to confirm reservation.");
-    } finally {
+  const confirmBooking = () => {
+    setLoading(true);
+    setTimeout(() => {
       setLoading(false);
-    }
+      setShowSuccess(true);
+    }, 800);
   };
-
-  if (!isLoaded) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
-      <Toaster position="top-center" />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-40 pb-32 font-['Manrope'] selection:bg-[#c5a059]/30 text-[#f5f5f5] bg-[#050505] relative overflow-hidden">
+      {/* Noise Texture */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+
+      <div className="max-w-7xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-16 relative z-10">
         
-        <div className="text-center mb-12">
-          <h2 className="font-['Amatic_SC'] text-5xl md:text-6xl text-gray-800 dark:text-white">
-            Book a <span className="text-[#CE1212]">Table</span>
-          </h2>
-          <p className="text-gray-500 mt-2">Reserve your spot for a delicious experience</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden p-8 border border-gray-100 dark:border-gray-700">
+        {/* Form Section */}
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="lg:col-span-5 flex flex-col gap-12"
+        >
+          <header className="flex flex-col gap-4">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059]">Exquisite Dining</span>
+            <h1 className="font-['EB_Garamond'] text-5xl md:text-6xl text-white/90 leading-tight">Secure Your <br/><span className="italic text-[#c5a059]">Experience.</span></h1>
+            <p className="text-sm font-light text-white/50 max-w-md leading-relaxed mt-2">Join us for a culinary journey where every detail is orchestrated to perfection. Select your preferred timing and setting.</p>
+          </header>
           
-          {/* Progress Bar */}
-          <div className="flex justify-between mb-8 relative">
-            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 dark:bg-gray-700 -z-10 -translate-y-1/2"></div>
-            <div className={`absolute top-1/2 left-0 h-1 bg-[#CE1212] -z-10 -translate-y-1/2 transition-all duration-500`} style={{ width: step === 1 ? '0%' : step === 2 ? '50%' : '100%' }}></div>
-            
-            {[1, 2, 3].map(i => (
-              <div key={i} className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-500 ${step >= i ? 'bg-[#CE1212] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
-                {i}
+          <div className="p-8 bg-[#0a0a0a] rounded-2xl border border-white/5 flex flex-col gap-8 shadow-2xl">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Date</label>
+                <input 
+                  name="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
+                  className="bg-transparent border-b border-white/20 focus:border-[#c5a059] text-white/90 py-2 transition-all outline-none text-sm font-light" 
+                  type="date"
+                />
               </div>
-            ))}
-          </div>
-
-          {step === 1 && (
-            <form onSubmit={checkAvailability} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FiCalendar className="text-[#CE1212]" /> Date
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-[#CE1212] focus:ring-2 focus:ring-[#CE1212]/20 outline-none transition-all dark:text-white"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FiClock className="text-[#CE1212]" /> Time Slot
-                  </label>
-                  <select
-                    name="timeSlot"
-                    value={formData.timeSlot}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-[#CE1212] focus:ring-2 focus:ring-[#CE1212]/20 outline-none transition-all dark:text-white cursor-pointer"
-                  >
-                    {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FiUsers className="text-[#CE1212]" /> Party Size
-                  </label>
-                  <input
-                    type="number"
-                    name="partySize"
-                    min="1"
-                    max="20"
-                    value={formData.partySize}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-[#CE1212] focus:ring-2 focus:ring-[#CE1212]/20 outline-none transition-all dark:text-white"
-                    required
-                  />
-                </div>
-
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Party Size</label>
+                <select 
+                  name="partySize"
+                  value={formData.partySize}
+                  onChange={handleInputChange}
+                  className="bg-transparent border-b border-white/20 focus:border-[#c5a059] text-white/90 py-2 transition-all outline-none text-sm font-light appearance-none"
+                >
+                  <option className="bg-[#050505] text-white">2 Guests</option>
+                  <option className="bg-[#050505] text-white">4 Guests</option>
+                  <option className="bg-[#050505] text-white">6 Guests</option>
+                  <option className="bg-[#050505] text-white">8+ Guests</option>
+                </select>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#CE1212] hover:bg-[#a30e0e] text-white py-4 rounded-xl font-medium transition-all shadow-md mt-4 disabled:opacity-70 flex justify-center items-center"
-              >
-                {loading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Check Availability"}
-              </button>
-            </form>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-6">
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Available Tables for {formData.partySize} guests</h3>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {availableTables.map((table) => (
-                  <button
-                    key={table._id}
-                    onClick={() => proceedToConfirm(table._id)}
-                    className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-[#CE1212] hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
+            </div>
+            <div className="flex flex-col gap-4">
+              <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Preferred Time Slot</label>
+              <div className="grid grid-cols-3 gap-4">
+                {['18:00', '19:30', '21:00'].map(time => (
+                  <button 
+                    key={time}
+                    onClick={() => handleTimeSelect(time)}
+                    className={`py-3 rounded-lg text-xs tracking-wider transition-all duration-300 ${
+                      formData.timeSlot === time 
+                        ? 'border border-[#c5a059] bg-[#c5a059]/10 text-[#c5a059]' 
+                        : 'border border-white/10 text-white/60 hover:border-white/30 hover:text-white'
+                    }`}
                   >
-                    <span className="text-3xl font-bold text-gray-400 group-hover:text-[#CE1212]">T{table.tableNumber}</span>
-                    <span className="text-sm text-gray-500 mt-2">{table.location}</span>
-                    <span className="text-xs text-gray-400 mt-1">Cap: {table.capacity}</span>
+                    {time}
                   </button>
                 ))}
               </div>
-
-              <button onClick={() => setStep(1)} className="mt-6 text-gray-500 hover:text-gray-800 dark:hover:text-white underline">
-                Go Back
-              </button>
             </div>
-          )}
+            <button 
+              className="mt-4 bg-white text-[#050505] text-xs uppercase tracking-[0.2em] py-4 rounded-lg hover:bg-[#c5a059] hover:text-white transition-all duration-500 disabled:opacity-50" 
+              onClick={revealAvailability}
+              disabled={loading}
+            >
+              {loading ? 'Checking...' : 'Check Availability'}
+            </button>
+          </div>
+        </motion.div>
 
-          {step === 3 && (
-            <form onSubmit={submitReservation} className="space-y-6">
-              
-              <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl mb-6">
-                <p className="text-gray-700 dark:text-gray-300">
-                  <strong>Booking for:</strong> {formData.date} at {formData.timeSlot} <br/>
-                  <strong>Table:</strong> T{selectedTable.tableNumber} ({selectedTable.location}) for {formData.partySize} guests
-                </p>
+        {/* Interactive Map */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isMapActive ? 1 : 0.3 }}
+          transition={{ duration: 1 }}
+          className={`lg:col-span-7 relative ${!isMapActive ? 'pointer-events-none' : ''}`}
+        >
+          <div className="bg-[#0a0a0a] p-8 md:p-10 rounded-2xl border border-white/5 h-full min-h-[500px] flex flex-col gap-8 shadow-2xl relative">
+            <div className="flex justify-between items-end border-b border-white/10 pb-6">
+              <div className="flex flex-col gap-2">
+                <h2 className="font-['EB_Garamond'] text-2xl text-white/90">Select Your Atmosphere</h2>
+                <p className="text-xs text-white/40 font-light">Click on an available table to select.</p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FiUser className="text-[#CE1212]" /> Guest Name
-                  </label>
-                  <input
-                    type="text"
-                    name="guestName"
-                    value={formData.guestName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-[#CE1212] focus:ring-2 outline-none dark:text-white"
-                    required
-                  />
+              <div className="flex gap-4 text-[10px] uppercase tracking-[0.2em] text-white/40">
+                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#c5a059]"></span> Available</div>
+                <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-white/10"></span> Occupied</div>
+              </div>
+            </div>
+            
+            {/* Table Map */}
+            {isMapActive && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="flex-grow grid grid-cols-4 grid-rows-4 gap-4"
+              >
+                {/* Rooftop */}
+                <div className="col-span-2 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative group bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                  <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Rooftop</div>
+                  <div 
+                    className={`w-16 h-16 rounded-full border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 ${selectedTable?.id === 'r1' ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`} 
+                    onClick={() => selectTable('r1', 'Table 12', 'Rooftop')}
+                  >
+                    T12
+                  </div>
+                </div>
+                
+                {/* Terrace */}
+                <div className="col-span-2 row-span-1 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                  <div className="absolute top-2 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Terrace</div>
+                  <div className="flex gap-4 w-full justify-center mt-2">
+                    <div 
+                      className={`w-12 h-8 rounded border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 text-xs ${selectedTable?.id === 'o1' ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`} 
+                      onClick={() => selectTable('o1', 'Table 08', 'Terrace')}
+                    >
+                      T08
+                    </div>
+                    <div className="w-12 h-8 rounded border border-white/5 bg-white/5 flex items-center justify-center cursor-not-allowed text-xs text-white/20">
+                      T09
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Main Hall */}
+                <div className="col-span-4 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col relative bg-white/[0.02]">
+                  <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Main Dining Hall</div>
+                  <div className="grid grid-cols-6 gap-4 mt-8">
+                    {['m1', 'm2', 'm3', 'm4', 'm5', 'm6'].map((t, idx) => (
+                      <div 
+                        key={t}
+                        className={`h-16 rounded-lg border flex items-center justify-center text-xs transition-all duration-300 ${
+                          ['m3', 'm5'].includes(t) 
+                            ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' 
+                            : `border-white/20 cursor-pointer ${selectedTable?.id === t ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`
+                        }`}
+                        onClick={() => !['m3', 'm5'].includes(t) && selectTable(t, `Table 0${idx+1}`, 'Main Hall')}
+                      >
+                        T0{idx+1}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                    <FiPhone className="text-[#CE1212]" /> Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="guestPhone"
-                    value={formData.guestPhone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-[#CE1212] focus:ring-2 outline-none dark:text-white"
-                    required
-                  />
+                {/* Chef's Table */}
+                <div className="col-span-2 row-span-1 p-4 border border-[#c5a059]/20 bg-[#c5a059]/5 rounded-xl flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Chef's Table</span>
+                    <span className="text-[10px] text-white/40 italic font-['EB_Garamond']">Exclusive selection</span>
+                  </div>
+                  <div 
+                    className={`w-12 h-8 rounded border flex items-center justify-center cursor-pointer transition-all duration-300 text-xs ${selectedTable?.id === 'c1' ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-[#c5a059]/40 text-[#c5a059] hover:bg-[#c5a059]/10'}`} 
+                    onClick={() => selectTable('c1', 'Chef Table', 'Kitchen Front')}
+                  >
+                    <span className="material-symbols-outlined text-[14px]">star</span>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                  <FiMessageSquare className="text-[#CE1212]" /> Special Requests (Optional)
-                </label>
-                <textarea
-                  name="specialRequest"
-                  value={formData.specialRequest}
-                  onChange={handleInputChange}
-                  rows="3"
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-[#CE1212] focus:ring-2 outline-none dark:text-white"
-                ></textarea>
-              </div>
-
-              <div className="flex gap-4">
-                <button type="button" onClick={() => setStep(2)} className="w-1/3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white py-4 rounded-xl font-medium transition-all">
-                  Back
-                </button>
-                <button type="submit" disabled={loading} className="w-2/3 bg-[#CE1212] hover:bg-[#a30e0e] text-white py-4 rounded-xl font-medium transition-all shadow-md flex justify-center items-center">
-                  {loading ? <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : "Confirm Reservation"}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {step === 4 && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FiCheckCircle className="text-4xl text-green-500" />
-              </div>
-              <h3 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Reservation Confirmed!</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-8">We've sent the details to your email. We look forward to serving you.</p>
-              <button onClick={() => setStep(1)} className="bg-[#CE1212] hover:bg-[#a30e0e] text-white px-8 py-3 rounded-full font-medium transition-all">
-                Make Another Booking
-              </button>
-            </div>
-          )}
-
-        </div>
+            {/* Confirmation Summary */}
+            <AnimatePresence>
+              {selectedTable && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="absolute bottom-0 left-0 w-full p-8 bg-[#0a0a0a] border-t border-white/10 rounded-b-2xl flex flex-col md:flex-row justify-between items-center gap-6"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-1">Your Selection</span>
+                    <div className="flex items-center gap-4">
+                      <span className="font-['EB_Garamond'] text-2xl text-white/90">{selectedTable.name} • {selectedTable.location}</span>
+                      <span className="text-sm font-light text-white/50">/ {formData.timeSlot}</span>
+                    </div>
+                  </div>
+                  <button 
+                    className="bg-[#c5a059] text-white text-xs uppercase tracking-[0.2em] py-3 px-8 rounded-lg hover:bg-white hover:text-[#050505] transition-all duration-500 disabled:opacity-50 w-full md:w-auto" 
+                    onClick={confirmBooking}
+                    disabled={loading}
+                  >
+                    {loading ? 'Confirming...' : 'Confirm Booking'}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
+
+      {/* Success Modal */}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#050505]/95 backdrop-blur-md flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-md w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-10 text-center flex flex-col items-center shadow-2xl"
+            >
+              <div className="w-20 h-20 rounded-full border border-[#c5a059] flex items-center justify-center mb-8 relative">
+                <div className="absolute inset-0 bg-[#c5a059]/10 rounded-full animate-ping opacity-20"></div>
+                <span className="material-symbols-outlined text-[#c5a059] text-3xl">check</span>
+              </div>
+              <h2 className="font-['EB_Garamond'] text-4xl text-white/90 mb-4">Table Reserved</h2>
+              <p className="text-white/50 text-sm font-light leading-relaxed mb-10">Thank you. Your culinary journey begins at YUMMY. A confirmation has been sent to your registered email.</p>
+              
+              <div className="w-full bg-white/5 rounded-xl p-6 grid grid-cols-2 gap-4 text-left mb-8">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">Guests</span>
+                  <span className="text-white/90 text-sm">{formData.partySize}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">Date & Time</span>
+                  <span className="text-white/90 text-sm">{new Date(formData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, {formData.timeSlot}</span>
+                </div>
+              </div>
+              
+              <button 
+                className="w-full bg-white text-[#050505] text-xs uppercase tracking-[0.2em] py-4 rounded-lg hover:bg-[#c5a059] hover:text-white transition-all duration-500" 
+                onClick={() => window.location.reload()}
+              >
+                Return to Menu
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import api from '../utils/axios';
-import MenuTabs from '../components/MenuTabs';
 import MenuCard from '../components/MenuCard';
 import { useDebounce } from 'use-debounce';
-import { FiSearch, FiFilter } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Menu = () => {
   const [categories, setCategories] = useState([]);
@@ -14,10 +12,6 @@ const Menu = () => {
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
   const [loading, setLoading] = useState(true);
 
-  // Filters
-  const [showVegOnly, setShowVegOnly] = useState(false);
-  const [sortBy, setSortBy] = useState(''); // 'price_asc', 'price_desc', 'rating'
-
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -25,7 +19,7 @@ const Menu = () => {
   useEffect(() => {
     fetchMenuItems();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCategory, debouncedSearchTerm, showVegOnly, sortBy]);
+  }, [activeCategory, debouncedSearchTerm]);
 
   const fetchCategories = async () => {
     try {
@@ -42,8 +36,6 @@ const Menu = () => {
       let query = '?';
       if (activeCategory !== 'all') query += `category=${activeCategory}&`;
       if (debouncedSearchTerm) query += `search=${debouncedSearchTerm}&`;
-      if (showVegOnly) query += `veg=true&`;
-      if (sortBy) query += `sort=${sortBy}&`;
 
       const res = await api.get(`/menu${query}`);
       setMenuItems(res.data);
@@ -55,102 +47,113 @@ const Menu = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div className="text-center mb-12">
-          <p className="text-gray-500 uppercase tracking-[2px] text-sm font-medium">Our Menu</p>
-          <h2 className="font-['Amatic_SC'] text-5xl md:text-6xl text-gray-800 dark:text-white mt-2">
-            Check Our <span className="text-[#CE1212]">Yummy Menu</span>
-          </h2>
-        </div>
+    <div className="min-h-screen pt-40 pb-32 font-['Manrope'] selection:bg-[#c5a059]/30 text-[#f5f5f5] bg-[#050505] relative overflow-hidden">
+      
+      {/* Subtle Noise Texture */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
 
-        {/* Search & Filters */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="relative w-full md:w-1/2">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl" />
+      <div className="max-w-7xl mx-auto px-6 md:px-16 relative z-10">
+        
+        {/* Header & Search */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-12 border-b border-white/10 pb-12"
+        >
+          <div>
+            <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-4 block">Gastronomy</span>
+            <h1 className="font-['EB_Garamond'] text-5xl md:text-7xl text-white/90 italic">The <span className="not-italic">Menu</span></h1>
+          </div>
+          
+          <div className="w-full md:w-1/3 relative border-b border-white/20 focus-within:border-[#c5a059] transition-colors pb-2">
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 material-symbols-outlined text-white/30 text-lg">search</span>
             <input
               type="text"
-              placeholder="Search for dishes, ingredients..."
+              placeholder="Search curations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-gray-100 dark:bg-gray-700 border-transparent rounded-xl focus:bg-white dark:focus:bg-gray-800 focus:border-[#CE1212] focus:ring-2 focus:ring-[#CE1212]/20 outline-none transition-all text-gray-800 dark:text-white"
+              className="w-full pl-10 pr-4 bg-transparent outline-none text-sm md:text-base text-white/90 placeholder-white/30 font-light"
             />
           </div>
+        </motion.div>
 
-          <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-            <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
-              <input
-                type="checkbox"
-                checked={showVegOnly}
-                onChange={(e) => setShowVegOnly(e.target.checked)}
-                className="w-5 h-5 text-[#CE1212] bg-gray-100 border-gray-300 rounded focus:ring-[#CE1212] dark:bg-gray-700 dark:border-gray-600"
-              />
-              Veg Only
-            </label>
-
-            <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2 hidden md:block"></div>
-            
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <FiFilter className="text-gray-400" />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-xl border-transparent focus:border-[#CE1212] focus:ring-0 outline-none cursor-pointer"
-              >
-                <option value="">Sort By</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="rating">Top Rated</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <MenuTabs 
-          categories={categories} 
-          activeCategory={activeCategory} 
-          setActiveCategory={setActiveCategory} 
-        />
-
-        {/* Menu Grid */}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#CE1212]"></div>
-          </div>
-        ) : menuItems.length > 0 ? (
-          <motion.div 
-            initial="hidden" 
-            animate="visible" 
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 }
-              }
-            }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        {/* Categories */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-wrap gap-8 mb-20"
+        >
+          <button
+            onClick={() => setActiveCategory('all')}
+            className={`text-xs uppercase tracking-[0.2em] transition-all duration-300 ${
+              activeCategory === 'all' 
+                ? 'text-[#c5a059]' 
+                : 'text-white/40 hover:text-white/80'
+            }`}
           >
-            {menuItems.map((item) => (
-              <motion.div 
-                key={item._id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
-                }}
-              >
-                <MenuCard item={item} />
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <div className="text-center py-20">
-            <h3 className="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No dishes found</h3>
-            <p className="text-gray-500 dark:text-gray-500">Try adjusting your search or filters to find what you're looking for.</p>
-          </div>
-        )}
+            All Curations
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat._id}
+              onClick={() => setActiveCategory(cat._id)}
+              className={`text-xs uppercase tracking-[0.2em] transition-all duration-300 ${
+                activeCategory === cat._id 
+                  ? 'text-[#c5a059]' 
+                  : 'text-white/40 hover:text-white/80'
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Menu List */}
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div 
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-center items-center h-64"
+            >
+              <div className="font-['EB_Garamond'] text-2xl italic text-[#c5a059] animate-pulse">
+                Curating...
+              </div>
+            </motion.div>
+          ) : menuItems.length > 0 ? (
+            <motion.div 
+              key="list"
+              className="flex flex-col gap-8"
+            >
+              {menuItems.map((item, index) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <MenuCard item={item} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-32 text-center"
+            >
+              <h3 className="font-['EB_Garamond'] text-3xl italic text-white/30">
+                No creations found.
+              </h3>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>

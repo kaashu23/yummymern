@@ -15,13 +15,16 @@ const clerkWebhookSync = async (req, res) => {
     if (eventType === 'user.created' || eventType === 'user.updated') {
       const email = attributes.email_addresses && attributes.email_addresses.length > 0 ? attributes.email_addresses[0].email_address : '';
       const name = attributes.first_name || attributes.username || '';
+      
+      const role = email === process.env.EMAIL_USER ? 'admin' : 'user';
 
       await User.findOneAndUpdate(
         { clerkId: id },
         { 
           clerkId: id,
           email: email,
-          name: name
+          name: name,
+          role: role
         },
         { upsert: true, new: true }
       );

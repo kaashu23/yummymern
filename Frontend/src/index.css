@@ -1,15 +1,65 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
-body {
-  background-color: #ffffff;
-  color: #111827;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --stroke-color: #111827;
 }
 
-@media (prefers-color-scheme: dark) {
-  body.dark {
-    background-color: #111827;
-    color: #f3f4f6;
-  }
+:root.dark {
+  --stroke-color: #f4f4f4;
+}
+
+body {
+  @apply bg-background text-on-surface font-body-md transition-colors duration-300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.fill-icon {
+  font-variation-settings: 'FILL' 1;
+}
+
+.glass-card {
+  background: rgba(30, 32, 32, 0.6);
+  backdrop-filter: blur(12px);
+  border: 0.5px solid rgba(233, 193, 118, 0.1);
+}
+
+.glass-effect {
+  backdrop-filter: blur(12px);
+  background: rgba(30, 32, 32, 0.7);
+}
+
+.table-selected {
+  @apply border-primary bg-primary/20 scale-105;
+  box-shadow: 0 0 15px rgba(233, 193, 118, 0.4);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Custom Scrollbar for Dashboard */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121414;
+}
+::-webkit-scrollbar-thumb {
+  background: #333535;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4e4639;
 }

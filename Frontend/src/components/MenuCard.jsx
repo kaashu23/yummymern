@@ -1,67 +1,43 @@
 import { Link } from 'react-router-dom';
-import { FiStar } from 'react-icons/fi';
+import { motion } from 'framer-motion';
 
 const MenuCard = ({ item }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col items-center p-6 relative">
-      
-      {/* Badges */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2">
-        {item.isChefSpecial && (
-          <span className="bg-[#CE1212] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-            Chef's Special
+    <motion.div 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative cursor-pointer block border-b border-white/10 pb-8 hover:border-[#c5a059]/50 transition-colors"
+    >
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 text-[#f5f5f5]">
+        <div className="flex-1 flex flex-col justify-center">
+          {item.isChefSpecial && (
+            <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-3 block">
+              Signature
+            </span>
+          )}
+          <h3 className="font-['EB_Garamond'] text-3xl md:text-4xl text-white/90 group-hover:text-[#c5a059] transition-colors duration-500">
+            {item.name}
+          </h3>
+          <p className="text-white/40 font-['Manrope'] text-sm font-light mt-3 max-w-lg leading-relaxed">
+            {item.description}
+          </p>
+        </div>
+        
+        <div className="text-left md:text-right flex flex-col items-start md:items-end">
+          <span className="font-['Manrope'] text-xl md:text-2xl font-light text-white/80">
+            ${item.price.toFixed(2)}
           </span>
-        )}
-        {item.isVeg ? (
-          <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-            Veg
-          </span>
-        ) : (
-          <span className="bg-red-800 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-            Non-Veg
-          </span>
-        )}
+          <Link 
+            to={`/menu/${item._id}`}
+            className="mt-4 text-[10px] uppercase tracking-[0.2em] text-white/50 group-hover:text-white transition-colors flex items-center gap-2"
+          >
+            Discover <span className="material-symbols-outlined text-[12px]">east</span>
+          </Link>
+        </div>
       </div>
-
-      {/* Image */}
-      <div className="w-48 h-48 rounded-full overflow-hidden mb-6 mt-4 shadow-lg group-hover:scale-105 transition-transform duration-500">
-        <img 
-          src={item.images[0] || 'https://via.placeholder.com/300'} 
-          alt={item.name} 
-          className="w-full h-full object-cover"
-        />
-      </div>
-
-      {/* Content */}
-      <h3 className="text-2xl font-semibold text-gray-800 dark:text-white mb-2 text-center group-hover:text-[#CE1212] transition-colors">
-        {item.name}
-      </h3>
-      
-      <p className="text-gray-500 dark:text-gray-400 text-center text-sm mb-4 line-clamp-2">
-        {item.description}
-      </p>
-
-      <div className="flex items-center gap-1 mb-4">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <FiStar 
-            key={star} 
-            className={`w-4 h-4 ${star <= Math.round(item.averageRating || 0) ? 'text-yellow-400 fill-current' : 'text-gray-300 dark:text-gray-600'}`} 
-          />
-        ))}
-        <span className="text-xs text-gray-400 ml-1">({item.ratings?.length || 0})</span>
-      </div>
-
-      <div className="text-3xl font-bold text-[#CE1212]">
-        ${item.price.toFixed(2)}
-      </div>
-
-      <Link 
-        to={`/menu/${item._id}`}
-        className="mt-6 px-6 py-2 border-2 border-[#CE1212] text-[#CE1212] hover:bg-[#CE1212] hover:text-white rounded-full font-medium transition-all"
-      >
-        View Details
-      </Link>
-    </div>
+    </motion.div>
   );
 };
 
