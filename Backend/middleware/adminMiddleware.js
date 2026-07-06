@@ -32,6 +32,9 @@ const adminMiddleware = [
       req.user = user;
       next();
     } catch (error) {
+
+
+
       next(error);
     }
   }

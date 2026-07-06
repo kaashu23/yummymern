@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import api from '../utils/axios';
+import { useAuth, useUser } from '@clerk/clerk-react';
 
 const Reservation = () => {
   const navigate = useNavigate();
@@ -11,9 +13,13 @@ const Reservation = () => {
     timeSlot: '19:30',
   });
   const [isMapActive, setIsMapActive] = useState(false);
+  const [availableTables, setAvailableTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  const { isSignedIn, getToken } = useAuth();
+  const { user } = useUser();
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,18 +29,38 @@ const Reservation = () => {
     setFormData({ ...formData, timeSlot: time });
   };
 
-  const revealAvailability = () => {
+  const revealAvailability = async () => {
     if (!formData.date || !formData.partySize || !formData.timeSlot) {
       toast.error('Please fill in all details');
       return;
     }
     
     setLoading(true);
-    // Simulate API check
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await api.get('/reservations/availability', {
+        params: {
+          date: formData.date,
+          timeSlot: formData.timeSlot,
+          partySize: parseInt(formData.partySize.split(' ')[0])
+        }
+      });
+      
+      if (!res.data.available) {
+        toast.error('No tables available for this time and party size.');
+        setIsMapActive(false);
+        setAvailableTables([]);
+        return;
+      }
+      
+      setAvailableTables(res.data.tables);
       setIsMapActive(true);
-    }, 800);
+      setSelectedTable(null); // Reset selection
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Failed to check availability');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const selectTable = (tableId, tableName, location) => {
@@ -42,12 +68,43 @@ const Reservation = () => {
     setSelectedTable({ id: tableId, name: tableName, location });
   };
 
-  const confirmBooking = () => {
+  const confirmBooking = async () => {
+    if (!isSignedIn) {
+      toast.error('Please sign in to confirm your reservation.');
+      return;
+    }
+    if (!selectedTable) return;
+    
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const token = await getToken();
+      await api.post('/reservations', {
+        date: formData.date,
+        timeSlot: formData.timeSlot,
+        partySize: parseInt(formData.partySize.split(' ')[0]),
+        tableId: selectedTable.id,
+        guestName: user?.fullName || 'Guest'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
       setShowSuccess(true);
-    }, 800);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || 'Failed to confirm booking');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Helper to check if a table is available in the fetched data
+  const isTableAvailable = (tableNumber) => {
+    return availableTables.some(t => t.tableNumber === tableNumber);
+  };
+
+  const getTableId = (tableNumber) => {
+    const t = availableTables.find(t => t.tableNumber === tableNumber);
+    return t ? t._id : null;
   };
 
   return (
@@ -155,8 +212,11 @@ const Reservation = () => {
                 <div className="col-span-2 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative group bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
                   <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Rooftop</div>
                   <div 
-                    className={`w-16 h-16 rounded-full border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 ${selectedTable?.id === 'r1' ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`} 
-                    onClick={() => selectTable('r1', 'Table 12', 'Rooftop')}
+                    className={`w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                      !isTableAvailable(12) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
+                      selectedTable?.tableNumber === 12 ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
+                    }`} 
+                    onClick={() => isTableAvailable(12) && selectTable(getTableId(12), 'Table 12', 'Rooftop')}
                   >
                     T12
                   </div>
@@ -166,15 +226,18 @@ const Reservation = () => {
                 <div className="col-span-2 row-span-1 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
                   <div className="absolute top-2 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Terrace</div>
                   <div className="flex gap-4 w-full justify-center mt-2">
-                    <div 
-                      className={`w-12 h-8 rounded border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 text-xs ${selectedTable?.id === 'o1' ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`} 
-                      onClick={() => selectTable('o1', 'Table 08', 'Terrace')}
-                    >
-                      T08
-                    </div>
-                    <div className="w-12 h-8 rounded border border-white/5 bg-white/5 flex items-center justify-center cursor-not-allowed text-xs text-white/20">
-                      T09
-                    </div>
+                    {[8, 9].map((tNum) => (
+                      <div 
+                        key={tNum}
+                        className={`w-12 h-8 rounded border flex items-center justify-center text-xs transition-all duration-300 ${
+                          !isTableAvailable(tNum) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
+                          selectedTable?.tableNumber === tNum ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
+                        }`} 
+                        onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Terrace')}
+                      >
+                        T0{tNum}
+                      </div>
+                    ))}
                   </div>
                 </div>
                 
@@ -182,17 +245,17 @@ const Reservation = () => {
                 <div className="col-span-4 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col relative bg-white/[0.02]">
                   <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Main Dining Hall</div>
                   <div className="grid grid-cols-6 gap-4 mt-8">
-                    {['m1', 'm2', 'm3', 'm4', 'm5', 'm6'].map((t, idx) => (
+                    {[1, 2, 3, 4, 5, 6].map((tNum) => (
                       <div 
-                        key={t}
+                        key={tNum}
                         className={`h-16 rounded-lg border flex items-center justify-center text-xs transition-all duration-300 ${
-                          ['m3', 'm5'].includes(t) 
+                          !isTableAvailable(tNum) 
                             ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' 
-                            : `border-white/20 cursor-pointer ${selectedTable?.id === t ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`
+                            : `border-white/20 cursor-pointer ${selectedTable?.id === getTableId(tNum) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`
                         }`}
-                        onClick={() => !['m3', 'm5'].includes(t) && selectTable(t, `Table 0${idx+1}`, 'Main Hall')}
+                        onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Main Hall')}
                       >
-                        T0{idx+1}
+                        T0{tNum}
                       </div>
                     ))}
                   </div>
@@ -205,8 +268,11 @@ const Reservation = () => {
                     <span className="text-[10px] text-white/40 italic font-['EB_Garamond']">Exclusive selection</span>
                   </div>
                   <div 
-                    className={`w-12 h-8 rounded border flex items-center justify-center cursor-pointer transition-all duration-300 text-xs ${selectedTable?.id === 'c1' ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-[#c5a059]/40 text-[#c5a059] hover:bg-[#c5a059]/10'}`} 
-                    onClick={() => selectTable('c1', 'Chef Table', 'Kitchen Front')}
+                    className={`w-12 h-8 rounded border flex items-center justify-center transition-all duration-300 text-xs ${
+                      !isTableAvailable(7) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
+                      selectedTable?.id === getTableId(7) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059] cursor-pointer' : 'border-[#c5a059]/40 text-[#c5a059] hover:bg-[#c5a059]/10 cursor-pointer'
+                    }`} 
+                    onClick={() => isTableAvailable(7) && selectTable(getTableId(7), 'Chef Table', 'Kitchen Front')}
                   >
                     <span className="material-symbols-outlined text-[14px]">star</span>
                   </div>
