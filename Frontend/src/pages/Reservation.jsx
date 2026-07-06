@@ -257,40 +257,47 @@ const Reservation = () => {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-md w-full bg-[#0a0a0a] border border-white/10 rounded-2xl p-10 text-center flex flex-col items-center shadow-2xl"
+              className="max-w-2xl w-full mx-auto bg-[#050505] border border-white/10 p-10 md:p-16 text-center flex flex-col items-center shadow-2xl relative"
             >
-              <div className="w-20 h-20 rounded-full border border-[#c5a059] flex items-center justify-center mb-8 relative">
-                <div className="absolute inset-0 bg-[#c5a059]/10 rounded-full animate-ping opacity-20"></div>
-                <span className="material-symbols-outlined text-[#c5a059] text-3xl">check</span>
+              <div className="absolute top-0 left-0 w-12 h-12 border-t border-l border-[#c5a059]"></div>
+              <div className="absolute top-0 right-0 w-12 h-12 border-t border-r border-[#c5a059]"></div>
+              <div className="absolute bottom-0 left-0 w-12 h-12 border-b border-l border-[#c5a059]"></div>
+              <div className="absolute bottom-0 right-0 w-12 h-12 border-b border-r border-[#c5a059]"></div>
+
+              <div className="text-[#c5a059] mb-6">
+                <span className="material-symbols-outlined text-5xl font-light">check_circle</span>
               </div>
-              <h2 className="font-['EB_Garamond'] text-4xl text-white/90 mb-4">Table Reserved</h2>
-              <p className="text-white/50 text-sm font-light leading-relaxed mb-10">Thank you. Your culinary journey begins at YUMMY. A confirmation has been sent to your registered email.</p>
               
-              <div className="w-full bg-[#111] border border-[#c5a059]/20 rounded-xl p-6 flex justify-between items-center mb-8 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#c5a059]"></div>
-                
-                <div className="flex flex-col gap-1 flex-1 text-left pl-2">
-                  <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Table</span>
-                  <span className="text-white/90 font-['EB_Garamond'] text-2xl">{selectedTable?.name || 'Selected'}</span>
+              <h2 className="font-['EB_Garamond'] text-4xl text-white mb-2">Confirmed.</h2>
+              <p className="text-white/40 text-sm font-light mb-10">We look forward to hosting you.</p>
+              
+              <div className="w-full flex flex-col gap-4 text-left mb-8">
+                <div className="flex justify-between items-end border-b border-white/10 pb-2 gap-4">
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 shrink-0">Table</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-lg italic text-right">{selectedTable?.name || 'Selected'}</span>
                 </div>
-                
-                <div className="flex flex-col gap-1 flex-1 border-x border-white/10 px-4 text-center">
-                  <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Guests</span>
-                  <span className="text-white/90 font-['EB_Garamond'] text-2xl">{formData.partySize.split(' ')[0]}</span>
+                <div className="flex justify-between items-end border-b border-white/10 pb-2 gap-4">
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 shrink-0">Guests</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-lg italic text-right">{formData.partySize}</span>
                 </div>
-                
-                <div className="flex flex-col gap-1 flex-1 text-right">
-                  <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Time</span>
-                  <span className="text-white/90 font-['EB_Garamond'] text-xl">{formData.timeSlot}</span>
-                  <span className="text-white/50 text-xs font-light">{new Date(formData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                <div className="flex justify-between items-end border-b border-white/10 pb-2 gap-4">
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 shrink-0">Date</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-lg italic text-right">{new Date(formData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                </div>
+                <div className="flex justify-between items-end border-b border-white/10 pb-2 gap-4">
+                  <span className="text-[9px] uppercase tracking-[0.2em] text-white/40 shrink-0">Time</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-lg italic text-right">{formData.timeSlot}</span>
                 </div>
               </div>
               
               <button 
-                className="w-full bg-white text-[#050505] text-xs uppercase tracking-[0.2em] py-4 rounded-lg hover:bg-[#c5a059] hover:text-white transition-all duration-500" 
+                className="group relative w-full overflow-hidden border border-white/20 py-3 hover:border-[#c5a059] transition-colors duration-500"
                 onClick={() => navigate('/menu')}
               >
-                Return to Menu
+                <div className="absolute inset-0 bg-[#c5a059] translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 ease-in-out"></div>
+                <span className="relative z-10 text-[9px] uppercase tracking-[0.3em] text-white group-hover:text-[#050505] transition-colors duration-500">
+                  Return to Menu
+                </span>
               </button>
             </motion.div>
           </motion.div>
