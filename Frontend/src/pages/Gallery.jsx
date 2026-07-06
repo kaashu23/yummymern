@@ -54,15 +54,15 @@ const Gallery = () => {
                 }`}
               >
                 <img 
-                  src={item.imageUrl} 
-                  alt={item.title} 
+                  src={item.image} 
+                  alt={item.caption} 
                   className="w-full h-full object-cover filter grayscale hover:grayscale-0 scale-105 hover:scale-100 transition-all duration-700"
                 />
                 
                 {/* Minimal Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6 pointer-events-none">
                   <div>
-                    <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-1">{item.title}</h3>
+                    <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-1">{item.caption}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-[#c5a059]">{item.category}</p>
                   </div>
                 </div>

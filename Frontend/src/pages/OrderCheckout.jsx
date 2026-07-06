@@ -1,6 +1,17 @@
 import { motion } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const OrderCheckout = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { cart, subtotal, taxes, total } = location.state || { cart: [], subtotal: 0, taxes: 0, total: 0 };
+
+  const handlePayment = (e) => {
+    e.preventDefault();
+    // Simulate stripe success for now and redirect to My Orders
+    navigate('/my-orders');
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5] selection:bg-[#c5a059]/30 pt-40 pb-32 px-6 md:px-16 overflow-hidden">
       <div className="max-w-3xl mx-auto">
@@ -17,6 +28,7 @@ const OrderCheckout = () => {
         </motion.div>
 
         <motion.form 
+          onSubmit={handlePayment}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.2 }}
@@ -36,11 +48,11 @@ const OrderCheckout = () => {
           <div className="space-y-6">
             <h3 className="text-xs uppercase tracking-[0.3em] text-white/60 border-b border-white/10 pb-4">Delivery Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" placeholder="First Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
-              <input type="text" placeholder="Last Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
-              <input type="text" placeholder="Street Address" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors md:col-span-2" />
-              <input type="text" placeholder="City" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
-              <input type="text" placeholder="ZIP Code" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input type="text" required placeholder="First Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input type="text" required placeholder="Last Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input type="text" required placeholder="Street Address" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors md:col-span-2" />
+              <input type="text" required placeholder="City" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input type="text" required placeholder="ZIP Code" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
             </div>
           </div>
 
@@ -54,7 +66,7 @@ const OrderCheckout = () => {
           </div>
 
           <button type="submit" className="w-full py-5 bg-white text-[#050505] text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-[#c5a059] hover:text-white transition-colors duration-500 mt-8">
-            Pay $150.50 with Stripe
+            Pay ₹{total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} with Stripe
           </button>
         </motion.form>
       </div>

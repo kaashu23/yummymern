@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser, SignedIn, SignedOut, UserButton, useClerk } from '@clerk/clerk-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -7,7 +7,21 @@ const Home = () => {
   const { user } = useUser();
   const { openSignIn } = useClerk();
   const navigate = useNavigate();
+  const [menuItems, setMenuItems] = useState([]);
   const isAdmin = user?.publicMetadata?.role === 'admin';
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const { default: api } = await import('../utils/axios');
+        const res = await api.get('/menu');
+        setMenuItems(res.data);
+      } catch (error) {
+        console.error('Failed to fetch menu:', error);
+      }
+    };
+    fetchMenuItems();
+  }, []);
 
   // For Parallax effects
   const containerRef = useRef(null);
@@ -183,31 +197,31 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {[
-              { name: "Scallop Carpaccio", price: "$45", desc: "Truffle vinaigrette, microherbs, gold leaf.", delay: 0.1 },
-              { name: "Wagyu A5 Striploin", price: "$120", desc: "Smoked garlic purée, bone marrow jus.", delay: 0.3 },
-              { name: "Dark Chocolate Sphere", price: "$35", desc: "Passionfruit center, almond praline.", delay: 0.5 }
-            ].map((item, idx) => (
+            {menuItems.slice(0, 3).map((item, idx) => (
               <motion.div 
-                key={idx}
+                key={item._id || idx}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 1, delay: item.delay, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 1, delay: idx * 0.2, ease: [0.16, 1, 0.3, 1] }}
                 className="group cursor-pointer"
+                onClick={() => navigate('/menu')}
               >
                 <div className="aspect-square bg-[#111] rounded-xl mb-6 relative overflow-hidden">
-                   {/* We don't have 3 images, so we'll use a refined gradient placeholder for luxury minimalism */}
-                   <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#050505] group-hover:scale-105 transition-transform duration-700"></div>
-                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                   {item.image ? (
+                     <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                   ) : (
+                     <div className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#050505] group-hover:scale-105 transition-transform duration-700"></div>
+                   )}
+                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                      <span className="text-xs uppercase tracking-[0.2em] text-[#c5a059]">Discover</span>
                    </div>
                 </div>
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-['EB_Garamond'] text-xl text-white/90 group-hover:text-[#c5a059] transition-colors">{item.name}</h3>
-                  <span className="text-sm font-light text-white/50">{item.price}</span>
+                  <span className="text-sm font-light text-white/50">₹{item.price.toLocaleString()}</span>
                 </div>
-                <p className="text-white/40 text-sm leading-relaxed">{item.desc}</p>
+                <p className="text-white/40 text-sm leading-relaxed">{item.description}</p>
               </motion.div>
             ))}
           </div>

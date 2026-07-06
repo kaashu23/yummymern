@@ -46,7 +46,7 @@ const About = () => {
               </p>
             </div>
             <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-white/5">
-              <img src="/images/interior_restaurant_1783348039817.jpg" alt="Chef at work" className="w-full h-full object-cover scale-105 hover:scale-100 transition-all duration-700" />
+              <img src="/images/interior_restaurant.jpg" alt="Restaurant Interior" className="w-full h-full object-cover scale-105 hover:scale-100 transition-all duration-700" />
             </div>
           </div>
 
@@ -62,13 +62,13 @@ const About = () => {
               { num: 'II', title: 'Elevated Form', desc: 'We refine classic profiles into their most elegant components and rebuild them into exquisite, breathtaking creations.' },
               { num: 'III', title: 'Sensory Immersion', desc: 'Dining is a holistic journey. We curate soundscapes, lighting, and textures to envelop the senses in pure luxury.' }
             ].map((directive) => (
-              <div key={directive.num} className="group border-b border-white/10 py-12 flex flex-col md:flex-row md:items-center justify-between gap-8 hover:bg-white/[0.02] transition-colors px-4 -mx-4 rounded-xl">
-                <div className="flex items-center gap-8 md:w-1/2">
+              <div key={directive.num} className="group border-b border-white/10 py-10 flex flex-col md:flex-row md:items-start justify-between gap-4 hover:bg-white/[0.02] transition-colors px-4 -mx-4 rounded-xl">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8 md:w-1/3">
                   <span className="font-['EB_Garamond'] text-4xl text-[#c5a059] italic w-12">{directive.num}</span>
-                  <h3 className="font-['EB_Garamond'] text-3xl md:text-4xl text-white/90 group-hover:text-white transition-colors">{directive.title}</h3>
+                  <h3 className="font-['EB_Garamond'] text-2xl md:text-3xl text-white/90 group-hover:text-white transition-colors">{directive.title}</h3>
                 </div>
-                <div className="md:w-1/2">
-                  <p className="text-sm font-light text-white/40 leading-relaxed max-w-md ml-auto group-hover:text-white/70 transition-colors">
+                <div className="md:w-2/3 md:pl-12 mt-2 md:mt-0 flex items-center">
+                  <p className="text-base font-light text-white/50 leading-relaxed group-hover:text-white/80 transition-colors">
                     {directive.desc}
                   </p>
                 </div>

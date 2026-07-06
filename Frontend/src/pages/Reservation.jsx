@@ -1,8 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const Reservation = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     partySize: '2 Guests',
@@ -65,7 +67,6 @@ const Reservation = () => {
           <header className="flex flex-col gap-4">
             <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059]">Exquisite Dining</span>
             <h1 className="font-['EB_Garamond'] text-5xl md:text-6xl text-white/90 leading-tight">Secure Your <br/><span className="italic text-[#c5a059]">Experience.</span></h1>
-            <p className="text-sm font-light text-white/50 max-w-md leading-relaxed mt-2">Join us for a culinary journey where every detail is orchestrated to perfection. Select your preferred timing and setting.</p>
           </header>
           
           <div className="p-8 bg-[#0a0a0a] rounded-2xl border border-white/5 flex flex-col gap-8 shadow-2xl">
@@ -265,20 +266,29 @@ const Reservation = () => {
               <h2 className="font-['EB_Garamond'] text-4xl text-white/90 mb-4">Table Reserved</h2>
               <p className="text-white/50 text-sm font-light leading-relaxed mb-10">Thank you. Your culinary journey begins at YUMMY. A confirmation has been sent to your registered email.</p>
               
-              <div className="w-full bg-white/5 rounded-xl p-6 grid grid-cols-2 gap-4 text-left mb-8">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">Guests</span>
-                  <span className="text-white/90 text-sm">{formData.partySize}</span>
+              <div className="w-full bg-[#111] border border-[#c5a059]/20 rounded-xl p-6 flex justify-between items-center mb-8 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1 h-full bg-[#c5a059]"></div>
+                
+                <div className="flex flex-col gap-1 flex-1 text-left pl-2">
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Table</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-2xl">{selectedTable?.name || 'Selected'}</span>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-white/30">Date & Time</span>
-                  <span className="text-white/90 text-sm">{new Date(formData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, {formData.timeSlot}</span>
+                
+                <div className="flex flex-col gap-1 flex-1 border-x border-white/10 px-4 text-center">
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Guests</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-2xl">{formData.partySize.split(' ')[0]}</span>
+                </div>
+                
+                <div className="flex flex-col gap-1 flex-1 text-right">
+                  <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Time</span>
+                  <span className="text-white/90 font-['EB_Garamond'] text-xl">{formData.timeSlot}</span>
+                  <span className="text-white/50 text-xs font-light">{new Date(formData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                 </div>
               </div>
               
               <button 
                 className="w-full bg-white text-[#050505] text-xs uppercase tracking-[0.2em] py-4 rounded-lg hover:bg-[#c5a059] hover:text-white transition-all duration-500" 
-                onClick={() => window.location.reload()}
+                onClick={() => navigate('/menu')}
               >
                 Return to Menu
               </button>

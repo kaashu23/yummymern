@@ -38,6 +38,8 @@ app.use('/api/gallery', require('./routes/galleryRoutes'));
 app.use('/api/testimonials', require('./routes/testimonialRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 
 app.get('/', (req, res) => {
   res.send('Yummy API is running...');
