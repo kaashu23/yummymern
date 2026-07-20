@@ -28,7 +28,7 @@ const Chefs = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-24 text-center"
+          className="mb-20 text-center"
         >
           <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-4 block">The Artisans</span>
           <h1 className="font-['EB_Garamond'] text-5xl md:text-7xl text-white/90 font-medium">
@@ -50,38 +50,54 @@ const Chefs = () => {
               </div>
             </motion.div>
           ) : (
-            <motion.div key="content" className="flex flex-col gap-32">
+            <motion.div 
+              key="content" 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
+            >
               {chefs.map((chef, index) => (
                 <motion.div 
                   key={chef._id}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                  className={`flex flex-col ${index % 2 !== 0 ? 'md:flex-row-reverse' : 'md:flex-row'} items-center gap-16 md:gap-24`}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 1.2, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  className="group relative flex flex-col bg-[#0a0a0a] rounded-2xl border border-white/5 overflow-hidden hover:border-[#c5a059]/30 hover:shadow-[0_0_40px_rgba(197,160,89,0.1)] transition-all duration-700 h-[450px]"
                 >
-                  <div className="w-full md:w-1/2">
-                    <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-white/5 shadow-2xl">
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent opacity-50 z-10"></div>
-                      {chef.image && (
-                        <img 
-                          src={chef.image} 
-                          alt={chef.name} 
-                          className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 ease-[0.16,1,0.3,1]"
-                        />
-                      )}
-                    </div>
+                  <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent z-10"></div>
+                    {chef.image ? (
+                      <img 
+                        src={chef.image} 
+                        alt={chef.name} 
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000 ease-[0.16,1,0.3,1]"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#111] flex items-center justify-center">
+                        <span className="material-symbols-outlined text-6xl text-white/10">person</span>
+                      </div>
+                    )}
                   </div>
                   
-                  <div className="w-full md:w-1/2 flex flex-col justify-center text-center md:text-left">
-                    <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-4 block">{chef.role}</span>
-                    <h2 className="font-['EB_Garamond'] text-4xl md:text-5xl text-white/90 mb-8">{chef.name}</h2>
-                    <p className="text-white/50 font-light leading-relaxed text-sm md:text-base max-w-md mx-auto md:mx-0">
-                      {chef.bio}
-                    </p>
-                    <div className="mt-10 flex gap-6 justify-center md:justify-start">
-                      <span className="text-xs uppercase tracking-widest text-white/30 hover:text-white cursor-pointer transition-colors">Instagram</span>
-                      <span className="text-xs uppercase tracking-widest text-white/30 hover:text-white cursor-pointer transition-colors">LinkedIn</span>
+                  <div className="relative z-20 mt-auto p-8 flex flex-col">
+                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1]">
+                      <span className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-3 block">
+                        {chef.role}
+                      </span>
+                      <h2 className="font-['EB_Garamond'] text-3xl md:text-4xl text-white/90 mb-4">
+                        {chef.name}
+                      </h2>
+                      
+                      <div className="overflow-hidden">
+                        <p className="text-white/60 font-light text-sm leading-relaxed line-clamp-3 opacity-80 group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                          {chef.bio}
+                        </p>
+                      </div>
+                      
+                      <div className="mt-8 flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-200">
+                        <button className="text-[9px] uppercase tracking-[0.2em] text-[#c5a059] border border-[#c5a059]/30 hover:bg-[#c5a059] hover:text-[#050505] px-4 py-2 rounded-full transition-colors">
+                          View Profile
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </motion.div>

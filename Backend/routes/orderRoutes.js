@@ -4,7 +4,8 @@ const {
   createOrder,
   getMyOrders,
   getOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  cancelOrder
 } = require('../controllers/orderController');
 const { clerkMiddleware } = require('../middleware/clerkMiddleware');
 const { adminMiddleware } = require('../middleware/adminMiddleware');
@@ -21,5 +22,8 @@ router.route('/myorders')
 
 router.route('/:id/status')
   .put(adminMiddleware, updateOrderStatus); // Only admins can update status
+
+router.route('/:id/cancel')
+  .put(cancelOrder); // User can cancel own order
 
 module.exports = router;

@@ -1,15 +1,57 @@
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import toast from 'react-hot-toast';
 
 const OrderCheckout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const { user } = useUser();
   const { cart, subtotal, taxes, total } = location.state || { cart: [], subtotal: 0, taxes: 0, total: 0 };
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
-    // Simulate stripe success for now and redirect to My Orders
-    navigate('/my-orders');
+    if (cart.length === 0) return toast.error("Cart is empty");
+    
+    try {
+      toast.loading("Processing order...", { id: 'checkout' });
+      const token = await getToken();
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      
+      const payload = {
+        customerInfo: {
+          name: `${e.target[2].value} ${e.target[3].value}`,
+          email: user?.primaryEmailAddress?.emailAddress || 'guest@example.com'
+        },
+        orderType: 'delivery',
+        items: cart,
+        subtotal,
+        tax: taxes,
+        totalAmount: total,
+        deliveryAddress: `${e.target[4].value}, ${e.target[5].value}, ${e.target[6].value}`
+      };
+
+      const response = await fetch(`${apiUrl}/orders`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Payment successful! Order placed.", { id: 'checkout' });
+        navigate('/my-orders');
+      } else {
+        toast.error("Failed to place order: " + data.message, { id: 'checkout' });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred during checkout", { id: 'checkout' });
+    }
   };
 
   return (

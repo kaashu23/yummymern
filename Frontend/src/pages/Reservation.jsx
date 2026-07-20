@@ -7,10 +7,19 @@ import { useAuth, useUser } from '@clerk/clerk-react';
 
 const Reservation = () => {
   const navigate = useNavigate();
+  
+  const getLocalYYYYMMDD = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalYYYYMMDD(),
     partySize: '2 Guests',
-    timeSlot: '19:30',
+    timeSlot: '',
   });
   const [isMapActive, setIsMapActive] = useState(false);
   const [availableTables, setAvailableTables] = useState([]);
@@ -134,6 +143,7 @@ const Reservation = () => {
                   name="date"
                   value={formData.date}
                   onChange={handleInputChange}
+                  min={getLocalYYYYMMDD()}
                   className="bg-transparent border-b border-white/20 focus:border-[#c5a059] text-white/90 py-2 transition-all outline-none text-sm font-light" 
                   type="date"
                 />
@@ -156,19 +166,38 @@ const Reservation = () => {
             <div className="flex flex-col gap-4">
               <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Preferred Time Slot</label>
               <div className="grid grid-cols-3 gap-4">
-                {['18:00', '19:30', '21:00'].map(time => (
-                  <button 
-                    key={time}
-                    onClick={() => handleTimeSelect(time)}
-                    className={`py-3 rounded-lg text-xs tracking-wider transition-all duration-300 ${
-                      formData.timeSlot === time 
-                        ? 'border border-[#c5a059] bg-[#c5a059]/10 text-[#c5a059]' 
-                        : 'border border-white/10 text-white/60 hover:border-white/30 hover:text-white'
-                    }`}
-                  >
-                    {time}
-                  </button>
-                ))}
+                {(() => {
+                  const todayStr = getLocalYYYYMMDD();
+                  const validSlots = ['18:00', '19:30', '21:00'].filter(timeStr => {
+                    if (formData.date < todayStr) return false;
+                    if (formData.date === todayStr) {
+                      const now = new Date();
+                      const [slotHour, slotMinute] = timeStr.split(':').map(Number);
+                      if (now.getHours() > slotHour || (now.getHours() === slotHour && now.getMinutes() >= slotMinute)) {
+                        return false;
+                      }
+                    }
+                    return true;
+                  });
+
+                  if (validSlots.length === 0) {
+                    return <div className="col-span-3 text-white/40 text-[10px] italic py-3 text-center border border-white/5 rounded-lg">No slots available for this date</div>;
+                  }
+
+                  return validSlots.map(time => (
+                    <button 
+                      key={time}
+                      onClick={() => handleTimeSelect(time)}
+                      className={`py-3 rounded-lg text-xs tracking-wider transition-all duration-300 ${
+                        formData.timeSlot === time 
+                          ? 'border border-[#c5a059] bg-[#c5a059]/10 text-[#c5a059]' 
+                          : 'border border-white/10 text-white/60 hover:border-white/30 hover:text-white'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ));
+                })()}
               </div>
             </div>
             <button 

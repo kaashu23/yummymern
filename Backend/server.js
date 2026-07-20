@@ -9,23 +9,40 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const connectDB = require('./config/db');
 const Sentry = require('@sentry/node');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 // Connect Database
 connectDB();
 
 const app = express();
 
+// Set security HTTP headers
+app.use(helmet());
+
 // Webhook route needs to be mounted before express.json() to get raw body
 app.use('/api/auth', require('./routes/authRoutes'));
 
 // Middlewares
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: true, // Dynamically allows all origins to fix any port issues
   credentials: true
 }));
+
+// Rate limiting: 100 requests per 15 minutes per IP for API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { message: 'Too many requests from this IP, please try again in 15 minutes!' }
+});
+app.use('/api/', apiLimiter);
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'));
+
+const { clerkMiddleware } = require('@clerk/express');
+app.use(clerkMiddleware()); // Global Clerk middleware is required before requireAuth()
 
 // Routes
 app.use('/api/menu', require('./routes/menuRoutes'));
@@ -40,6 +57,7 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
 
 app.get('/', (req, res) => {
   res.send('Yummy API is running...');
@@ -57,8 +75,45 @@ app.use((err, req, res, next) => {
   });
 });
 
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: true, // Allow all origins to fix connection issues
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Make io accessible to routes
+app.set('io', io);
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+  
+  // Join a room for admin notifications
+  socket.on('join_admin', () => {
+    socket.join('admin_room');
+  });
+
+  // Join a personal room for order tracking
+  socket.on('join_user', (userId) => {
+    socket.join(`user_${userId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  });
+}
+
+module.exports = { app, server, io };

@@ -7,6 +7,10 @@ exports.createOrder = async (req, res, next) => {
   try {
     const { customerInfo, orderType, items, subtotal, tax, totalAmount, deliveryAddress, stripePaymentIntentId } = req.body;
 
+    const path = require('path');
+    const generateOrderPDF = require('../utils/pdfGenerator');
+    const sendEmail = require('../utils/sendEmail');
+    
     const order = await Order.create({
       clerkUserId: req.auth.userId, // From Clerk middleware
       customerInfo,
@@ -19,6 +23,37 @@ exports.createOrder = async (req, res, next) => {
       stripePaymentIntentId,
       status: 'pending'
     });
+
+    // Generate and Email PDF asynchronously
+    if (customerInfo && customerInfo.email) {
+      const filePath = path.join(__dirname, '..', 'temp', `Receipt-${order._id}.pdf`);
+      // Ensure temp dir exists
+      const fs = require('fs');
+      if (!fs.existsSync(path.join(__dirname, '..', 'temp'))) {
+        fs.mkdirSync(path.join(__dirname, '..', 'temp'));
+      }
+      
+      generateOrderPDF(order, filePath)
+        .then(() => {
+          return sendEmail({
+            email: customerInfo.email,
+            subject: 'Your Yummy Order Receipt',
+            message: `<h1>Thank you for your order!</h1><p>Hi ${customerInfo.name || 'Guest'}, your order receipt is attached as a PDF.</p>`,
+            attachments: [{ filename: `Receipt-${order._id}.pdf`, path: filePath }]
+          });
+        })
+        .then(() => {
+          // Cleanup
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        })
+        .catch(err => console.error("PDF/Email Error:", err));
+    }
+
+    // Emit real-time socket event to admins
+    const io = req.app.get('io');
+    if (io) {
+      io.to('admin_room').emit('new_order', order);
+    }
 
     res.status(201).json({
       success: true,
@@ -79,6 +114,31 @@ exports.updateOrderStatus = async (req, res, next) => {
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
+
+    res.status(200).json({
+      success: true,
+      data: order
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Cancel order (User)
+// @route   PUT /api/orders/:id/cancel
+// @access  Private
+exports.cancelOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, clerkUserId: req.auth.userId });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    if (order.status !== 'pending' && order.status !== 'Preparing') {
+      return res.status(400).json({ success: false, message: 'Cannot cancel order at this stage' });
+    }
+    
+    order.status = 'cancelled';
+    await order.save();
 
     res.status(200).json({
       success: true,

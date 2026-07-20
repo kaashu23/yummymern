@@ -14,7 +14,8 @@ const sendEmail = async (options) => {
       from: `Yummy Restaurant <${process.env.EMAIL_USER}>`,
       to: options.email,
       subject: options.subject,
-      html: options.message
+      html: options.message,
+      attachments: options.attachments || []
     };
 
     const info = await transporter.sendMail(mailOptions);

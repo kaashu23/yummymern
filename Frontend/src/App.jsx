@@ -30,6 +30,7 @@ import AdminGallery from './pages/admin/AdminGallery';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminMessages from './pages/admin/AdminMessages';
 
+import ChatWidget from './components/ChatWidget';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -74,7 +75,8 @@ function App() {
         </Routes>
       </main>
       
-      {!isAdmin && <Footer />}
+      <Footer />
+      <ChatWidget />
     </div>
   );
 }

@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
+import toast from 'react-hot-toast';
 
 const AdminLayout = () => {
   const { user, isLoaded } = useUser();
@@ -15,19 +17,41 @@ const AdminLayout = () => {
     return <Navigate to="/" replace />;
   }
 
+  const role = user?.publicMetadata?.role || (user?.primaryEmailAddress?.emailAddress === 'kashishsalvi06@gmail.com' ? 'super_admin' : 'admin');
+
+  useEffect(() => {
+    // Setup Socket.io for Real-Time notifications
+    import('socket.io-client').then(({ io }) => {
+      const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000');
+      
+      socket.on('connect', () => {
+        socket.emit('join_admin');
+      });
+
+      socket.on('new_order', (order) => {
+        toast.success(`New Order Received! ID: ${order._id.substring(0, 6)}`, {
+          icon: '🛎️',
+          duration: 5000,
+        });
+      });
+
+      return () => socket.disconnect();
+    });
+  }, []);
+
   const navLinks = [
-    { name: "Overview", path: "/admin/dashboard", icon: "dashboard" },
-    { name: "Reservations", path: "/admin/reservations", icon: "event_seat" },
-    { name: "Tables", path: "/admin/tables", icon: "table_restaurant" },
-    { name: "Menu", path: "/admin/menu", icon: "restaurant_menu" },
-    { name: "Categories", path: "/admin/categories", icon: "category" },
-    { name: "Orders", path: "/admin/orders", icon: "local_shipping" },
-    { name: "Events", path: "/admin/events", icon: "celebration" },
-    { name: "Chefs", path: "/admin/chefs", icon: "outdoor_grill" },
-    { name: "Gallery", path: "/admin/gallery", icon: "collections" },
-    { name: "Testimonials", path: "/admin/testimonials", icon: "reviews" },
-    { name: "Messages", path: "/admin/messages", icon: "mail" },
-  ];
+    { name: "Overview", path: "/admin/dashboard", icon: "dashboard", roles: ['super_admin', 'admin'] },
+    { name: "Reservations", path: "/admin/reservations", icon: "event_seat", roles: ['super_admin', 'admin', 'host'] },
+    { name: "Tables", path: "/admin/tables", icon: "table_restaurant", roles: ['super_admin', 'admin', 'host'] },
+    { name: "Menu", path: "/admin/menu", icon: "restaurant_menu", roles: ['super_admin', 'admin'] },
+    { name: "Categories", path: "/admin/categories", icon: "category", roles: ['super_admin', 'admin'] },
+    { name: "Orders", path: "/admin/orders", icon: "local_shipping", roles: ['super_admin', 'admin', 'chef'] },
+    { name: "Events", path: "/admin/events", icon: "celebration", roles: ['super_admin', 'admin'] },
+    { name: "Chefs", path: "/admin/chefs", icon: "outdoor_grill", roles: ['super_admin', 'admin'] },
+    { name: "Gallery", path: "/admin/gallery", icon: "collections", roles: ['super_admin', 'admin'] },
+    { name: "Testimonials", path: "/admin/testimonials", icon: "reviews", roles: ['super_admin', 'admin'] },
+    { name: "Messages", path: "/admin/messages", icon: "mail", roles: ['super_admin', 'admin', 'host'] },
+  ].filter(link => link.roles.includes(role));
 
   return (
     <div className="flex h-screen w-full bg-[#050505] text-[#f5f5f5] font-['Manrope'] selection:bg-[#c5a059]/30 overflow-hidden">
