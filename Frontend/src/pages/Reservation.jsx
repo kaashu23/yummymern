@@ -231,82 +231,84 @@ const Reservation = () => {
             
             {/* Table Map */}
             {isMapActive && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                className="flex-grow grid grid-cols-4 grid-rows-4 gap-4"
-              >
-                {/* Rooftop */}
-                <div className="col-span-2 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative group bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
-                  <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Rooftop</div>
-                  <div 
-                    className={`w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-300 ${
-                      !isTableAvailable(12) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
-                      selectedTable?.tableNumber === 12 ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
-                    }`} 
-                    onClick={() => isTableAvailable(12) && selectTable(getTableId(12), 'Table 12', 'Rooftop')}
-                  >
-                    T12
+              <div className="w-full overflow-x-auto pb-4 hide-scrollbar">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8 }}
+                  className="flex-grow grid grid-cols-4 grid-rows-4 gap-4 min-w-[500px]"
+                >
+                  {/* Rooftop */}
+                  <div className="col-span-2 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative group bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                    <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Rooftop</div>
+                    <div 
+                      className={`w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                        !isTableAvailable(12) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
+                        selectedTable?.tableNumber === 12 ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
+                      }`} 
+                      onClick={() => isTableAvailable(12) && selectTable(getTableId(12), 'Table 12', 'Rooftop')}
+                    >
+                      T12
+                    </div>
                   </div>
-                </div>
-                
-                {/* Terrace */}
-                <div className="col-span-2 row-span-1 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
-                  <div className="absolute top-2 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Terrace</div>
-                  <div className="flex gap-4 w-full justify-center mt-2">
-                    {[8, 9].map((tNum) => (
-                      <div 
-                        key={tNum}
-                        className={`w-12 h-8 rounded border flex items-center justify-center text-xs transition-all duration-300 ${
-                          !isTableAvailable(tNum) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
-                          selectedTable?.tableNumber === tNum ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
-                        }`} 
-                        onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Terrace')}
-                      >
-                        T0{tNum}
-                      </div>
-                    ))}
+                  
+                  {/* Terrace */}
+                  <div className="col-span-2 row-span-1 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                    <div className="absolute top-2 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Terrace</div>
+                    <div className="flex gap-4 w-full justify-center mt-2">
+                      {[8, 9].map((tNum) => (
+                        <div 
+                          key={tNum}
+                          className={`w-12 h-8 rounded border flex items-center justify-center text-xs transition-all duration-300 ${
+                            !isTableAvailable(tNum) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
+                            selectedTable?.tableNumber === tNum ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
+                          }`} 
+                          onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Terrace')}
+                        >
+                          T0{tNum}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                
-                {/* Main Hall */}
-                <div className="col-span-4 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col relative bg-white/[0.02]">
-                  <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Main Dining Hall</div>
-                  <div className="grid grid-cols-6 gap-4 mt-8">
-                    {[1, 2, 3, 4, 5, 6].map((tNum) => (
-                      <div 
-                        key={tNum}
-                        className={`h-16 rounded-lg border flex items-center justify-center text-xs transition-all duration-300 ${
-                          !isTableAvailable(tNum) 
-                            ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' 
-                            : `border-white/20 cursor-pointer ${selectedTable?.id === getTableId(tNum) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`
-                        }`}
-                        onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Main Hall')}
-                      >
-                        T0{tNum}
-                      </div>
-                    ))}
+                  
+                  {/* Main Hall */}
+                  <div className="col-span-4 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col relative bg-white/[0.02]">
+                    <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Main Dining Hall</div>
+                    <div className="grid grid-cols-6 gap-4 mt-8">
+                      {[1, 2, 3, 4, 5, 6].map((tNum) => (
+                        <div 
+                          key={tNum}
+                          className={`h-16 rounded-lg border flex items-center justify-center text-xs transition-all duration-300 ${
+                            !isTableAvailable(tNum) 
+                              ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' 
+                              : `border-white/20 cursor-pointer ${selectedTable?.id === getTableId(tNum) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'hover:border-[#c5a059]/50 text-white/50'}`
+                          }`}
+                          onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Main Hall')}
+                        >
+                          T0{tNum}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Chef's Table */}
-                <div className="col-span-2 row-span-1 p-4 border border-[#c5a059]/20 bg-[#c5a059]/5 rounded-xl flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Chef's Table</span>
-                    <span className="text-[10px] text-white/40 italic font-['EB_Garamond']">Exclusive selection</span>
+                  {/* Chef's Table */}
+                  <div className="col-span-2 row-span-1 p-4 border border-[#c5a059]/20 bg-[#c5a059]/5 rounded-xl flex items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Chef's Table</span>
+                      <span className="text-[10px] text-white/40 italic font-['EB_Garamond']">Exclusive selection</span>
+                    </div>
+                    <div 
+                      className={`w-12 h-8 rounded border flex items-center justify-center transition-all duration-300 text-xs ${
+                        !isTableAvailable(7) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
+                        selectedTable?.id === getTableId(7) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059] cursor-pointer' : 'border-[#c5a059]/40 text-[#c5a059] hover:bg-[#c5a059]/10 cursor-pointer'
+                      }`} 
+                      onClick={() => isTableAvailable(7) && selectTable(getTableId(7), 'Chef Table', 'Kitchen Front')}
+                    >
+                      <span className="material-symbols-outlined text-[14px]">star</span>
+                    </div>
                   </div>
-                  <div 
-                    className={`w-12 h-8 rounded border flex items-center justify-center transition-all duration-300 text-xs ${
-                      !isTableAvailable(7) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
-                      selectedTable?.id === getTableId(7) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059] cursor-pointer' : 'border-[#c5a059]/40 text-[#c5a059] hover:bg-[#c5a059]/10 cursor-pointer'
-                    }`} 
-                    onClick={() => isTableAvailable(7) && selectTable(getTableId(7), 'Chef Table', 'Kitchen Front')}
-                  >
-                    <span className="material-symbols-outlined text-[14px]">star</span>
-                  </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             )}
 
             {/* Confirmation Summary */}

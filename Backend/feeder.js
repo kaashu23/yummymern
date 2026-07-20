@@ -73,7 +73,7 @@ const seedData = async () => {
         description: 'Wok-tossed long-grain jasmine rice with fiery Szechuan peppercorns, vegetables, and burnt garlic.',
         price: 1200,
         category: categories[1]._id, // Mains
-        image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=2825&auto=format&fit=crop',
+        image: '/images/szechuan_fried_rice.jpg',
         isAvailable: true,
         dietary: ['Vegetarian', 'Vegan']
       },
@@ -82,7 +82,7 @@ const seedData = async () => {
         description: 'Golden-brown milk solids dumplings soaked in a delicate cardamom and rose water syrup.',
         price: 650,
         category: categories[2]._id, // Desserts
-        image: 'https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?q=80&w=2940&auto=format&fit=crop',
+        image: '/images/gulab_jamun.jpg',
         isAvailable: true,
         dietary: ['Vegetarian']
       },
@@ -91,7 +91,7 @@ const seedData = async () => {
         description: 'Chilled, creamy yogurt drink blended with Alphonso mangoes and a hint of Kashmiri saffron.',
         price: 450,
         category: categories[3]._id, // Drinks
-        image: 'https://images.unsplash.com/photo-1630138980137-b247f0d463b7?q=80&w=2940&auto=format&fit=crop',
+        image: '/images/saffron_mango_lassi.jpg',
         isAvailable: true,
         dietary: ['Vegetarian', 'Gluten-Free']
       },
@@ -100,7 +100,7 @@ const seedData = async () => {
         description: 'Black lentils slowly simmered overnight over tandoor coals, finished with cultured butter and fresh cream.',
         price: 950,
         category: categories[1]._id, // Mains
-        image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=2940&auto=format&fit=crop',
+        image: '/images/dal_makhani.jpg',
         isAvailable: true,
         dietary: ['Vegetarian', 'Gluten-Free']
       },
@@ -109,7 +109,7 @@ const seedData = async () => {
         description: 'Hand-stretched sourdough flatbread baked in a clay oven, brushed with truffle oil and confit garlic.',
         price: 350,
         category: categories[0]._id, // Starters
-        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=2940&auto=format&fit=crop',
+        image: '/images/truffle_garlic_naan.jpg',
         isAvailable: true,
         dietary: ['Vegetarian']
       },
@@ -118,7 +118,7 @@ const seedData = async () => {
         description: 'Slow-braised Kashmiri lamb shank in a vibrant sauce of fennel, ginger, and aromatic spices.',
         price: 2400,
         category: categories[1]._id, // Mains
-        image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=2836&auto=format&fit=crop',
+        image: '/images/lamb_rogan_josh.jpg',
         isAvailable: true,
         dietary: ['Gluten-Free']
       },
@@ -127,7 +127,7 @@ const seedData = async () => {
         description: 'Soft cottage cheese discs steeped in saffron and cardamom infused milk, garnished with pistachios.',
         price: 750,
         category: categories[2]._id, // Desserts
-        image: 'https://images.unsplash.com/photo-1574085733277-851d9d856a3a?q=80&w=2940&auto=format&fit=crop',
+        image: '/images/rasmalai.jpg',
         isAvailable: true,
         dietary: ['Vegetarian', 'Gluten-Free']
       },
@@ -136,7 +136,7 @@ const seedData = async () => {
         description: 'A robust blend of Assam tea leaves, freshly ground ginger, cardamom, and cloves, steeped in milk.',
         price: 350,
         category: categories[3]._id, // Drinks
-        image: 'https://images.unsplash.com/photo-1571934226194-ce26715b4984?q=80&w=2940&auto=format&fit=crop',
+        image: '/images/masala_chai.jpg',
         isAvailable: true,
         dietary: ['Vegetarian', 'Gluten-Free']
       }

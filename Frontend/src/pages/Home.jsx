@@ -101,14 +101,14 @@ const Home = () => {
       </section>
 
       {/* The Atmosphere Section */}
-      <section className="relative py-32 md:py-48 px-6 md:px-16 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-20">
+      <section className="relative py-20 md:py-48 px-6 md:px-16 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 md:gap-20">
         <div className="w-full md:w-1/2 relative">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            className="aspect-[3/4] overflow-hidden rounded-2xl"
+            className="aspect-[4/5] md:aspect-[3/4] overflow-hidden rounded-2xl"
           >
             <motion.img 
               style={{ y: ySection2 }}
@@ -123,19 +123,19 @@ const Home = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="absolute -bottom-10 -right-10 md:-right-20 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl max-w-[280px]"
+            className="absolute -bottom-6 right-2 md:-bottom-10 md:-right-20 bg-[#0a0a0a]/80 md:bg-white/5 backdrop-blur-xl border border-white/10 p-6 md:p-8 rounded-2xl w-[90%] md:max-w-[280px]"
           >
-            <p className="font-['EB_Garamond'] italic text-xl text-[#c5a059] mb-2">"An unforgettable atmosphere"</p>
-            <p className="text-xs text-white/40 uppercase tracking-widest">— The Michelin Guide</p>
+            <p className="font-['EB_Garamond'] italic text-lg md:text-xl text-[#c5a059] mb-2">"An unforgettable atmosphere"</p>
+            <p className="text-[10px] md:text-xs text-white/40 uppercase tracking-widest">— The Michelin Guide</p>
           </motion.div>
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-center">
+        <div className="w-full md:w-1/2 flex flex-col justify-center mt-10 md:mt-0">
           <motion.span 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-6"
+            className="text-[10px] uppercase tracking-[0.4em] text-[#c5a059] mb-4 md:mb-6"
           >
             The Atmosphere
           </motion.span>
@@ -144,7 +144,7 @@ const Home = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="font-['EB_Garamond'] text-5xl md:text-6xl text-white/90 leading-tight mb-8"
+            className="font-['EB_Garamond'] text-4xl md:text-6xl text-white/90 leading-tight mb-6 md:mb-8"
           >
             Elegance in <br/><span className="italic text-white/50">every detail.</span>
           </motion.h2>
@@ -153,7 +153,7 @@ const Home = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="text-white/50 text-sm md:text-base leading-relaxed mb-10"
+            className="text-white/50 text-sm md:text-base leading-relaxed mb-8 md:mb-10"
           >
             Step into a sanctuary of modern luxury. Our dining room is designed to strip away the noise of the city, leaving only the purest focus on the culinary journey ahead. Warm lighting, bespoke acoustics, and impeccable service await.
           </motion.p>
