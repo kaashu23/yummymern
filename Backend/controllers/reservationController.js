@@ -98,6 +98,26 @@ const createReservation = async (req, res, next) => {
       message: emailMessage
     });
 
+    // Notify admin asynchronously
+    const adminEmail = process.env.EMAIL_USER;
+    if (adminEmail) {
+      const adminMessage = `
+        <h1>New Reservation Request</h1>
+        <p>A new reservation has been made.</p>
+        <p><strong>Guest Name:</strong> ${reservation.guestName}</p>
+        <p><strong>Guest Phone:</strong> ${guestPhone || 'N/A'}</p>
+        <p><strong>Date:</strong> ${targetDate.toDateString()}</p>
+        <p><strong>Time:</strong> ${timeSlot}</p>
+        <p><strong>Party Size:</strong> ${partySize}</p>
+        <p><strong>Special Request:</strong> ${specialRequest || 'None'}</p>
+      `;
+      sendEmail({
+        email: adminEmail,
+        subject: 'Yummy - New Reservation Request',
+        message: adminMessage
+      });
+    }
+
     res.status(201).json(reservation);
   } catch (error) {
     next(error);

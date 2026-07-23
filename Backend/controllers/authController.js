@@ -28,6 +28,23 @@ const clerkWebhookSync = async (req, res) => {
         },
         { upsert: true, new: true }
       );
+
+      // Notify admin on new user registration
+      if (eventType === 'user.created') {
+        const sendEmail = require('../utils/sendEmail');
+        const adminEmail = process.env.EMAIL_USER;
+        if (adminEmail) {
+          sendEmail({
+            email: adminEmail,
+            subject: 'Yummy - New User Registration',
+            message: `<h1>New User Registered</h1>
+                      <p>A new user has just registered on Yummy.</p>
+                      <p><strong>Name:</strong> ${name}</p>
+                      <p><strong>Email:</strong> ${email}</p>`
+          });
+        }
+      }
+
       return res.status(200).json({ success: true, message: 'User synced successfully' });
     }
 

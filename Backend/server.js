@@ -23,11 +23,36 @@ app.use(helmet());
 // Webhook route needs to be mounted before express.json() to get raw body
 app.use('/api/auth', require('./routes/authRoutes'));
 
-// Middlewares
-app.use(cors({
-  origin: true, // Dynamically allows all origins to fix any port issues
+// CORS Configuration
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL,
+  /\.netlify\.app$/,
+  /\.onrender\.com$/
+].filter(Boolean);
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return allowedOrigin === origin;
+    });
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting: 100 requests per 15 minutes per IP for API routes
 const apiLimiter = rateLimit({
@@ -81,8 +106,8 @@ const { Server } = require('socket.io');
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: true, // Allow all origins to fix connection issues
-    methods: ["GET", "POST"],
+    origin: corsOptions.origin,
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   }
 });

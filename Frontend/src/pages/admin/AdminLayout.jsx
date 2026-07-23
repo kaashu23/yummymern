@@ -6,20 +6,11 @@ import toast from 'react-hot-toast';
 const AdminLayout = () => {
   const { user, isLoaded } = useUser();
   const location = useLocation();
-
-  if (isLoaded && !user) {
-    return <Navigate to="/" replace />;
-  }
-
   const isAdmin = user?.publicMetadata?.role === 'admin' || user?.primaryEmailAddress?.emailAddress === 'kashishsalvi06@gmail.com';
 
-  if (isLoaded && user && !isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  const role = user?.publicMetadata?.role || (user?.primaryEmailAddress?.emailAddress === 'kashishsalvi06@gmail.com' ? 'super_admin' : 'admin');
-
   useEffect(() => {
+    if (!isAdmin) return;
+
     // Setup Socket.io for Real-Time notifications
     import('socket.io-client').then(({ io }) => {
       const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000');
@@ -37,7 +28,17 @@ const AdminLayout = () => {
 
       return () => socket.disconnect();
     });
-  }, []);
+  }, [isAdmin]);
+
+  if (isLoaded && !user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (isLoaded && user && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  const role = user?.publicMetadata?.role || (user?.primaryEmailAddress?.emailAddress === 'kashishsalvi06@gmail.com' ? 'super_admin' : 'admin');
 
   const navLinks = [
     { name: "Overview", path: "/admin/dashboard", icon: "dashboard", roles: ['super_admin', 'admin'] },

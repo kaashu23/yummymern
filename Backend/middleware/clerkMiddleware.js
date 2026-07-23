@@ -36,6 +36,20 @@ const clerkMiddleware = async (req, res, next) => {
           email: `${clerkId}@placeholder.com`, // Fallback
           role: 'user'
         });
+
+        // Notify admin about the local fallback registration
+        const sendEmail = require('../utils/sendEmail');
+        const adminEmail = process.env.EMAIL_USER;
+        if (adminEmail) {
+          sendEmail({
+            email: adminEmail,
+            subject: 'Yummy - New User Registration (Local Fallback)',
+            message: `<h1>New User Registered (Fallback)</h1>
+                      <p>A new user was auto-synced by the middleware because the Clerk webhook did not catch them.</p>
+                      <p>This usually happens in local development if the Clerk listener is not running.</p>
+                      <p><strong>Clerk ID:</strong> ${clerkId}</p>`
+          });
+        }
       }
 
     req.user = user;
