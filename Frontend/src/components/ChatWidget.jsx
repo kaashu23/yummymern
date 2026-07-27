@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import { useAuth } from '@clerk/clerk-react';
 import './ChatWidget.css'; // We will create this
 
 const ChatWidget = () => {
+  const { getToken, isSignedIn } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'ai', text: 'Hello! I am your AI concierge. How can I help you today?' }
@@ -30,10 +32,16 @@ const ChatWidget = () => {
     setIsLoading(true);
 
     try {
+      let headers = { 'Content-Type': 'application/json' };
+      if (isSignedIn) {
+        const token = await getToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${apiUrl}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: headers,
         body: JSON.stringify({ message: userMessage.text })
       });
       

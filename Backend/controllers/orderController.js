@@ -12,7 +12,7 @@ exports.createOrder = async (req, res, next) => {
     const sendEmail = require('../utils/sendEmail');
     
     const order = await Order.create({
-      clerkUserId: req.auth.userId, // From Clerk middleware
+      clerkUserId: req.user.clerkId, // From Clerk middleware
       customerInfo,
       orderType,
       items,
@@ -69,7 +69,7 @@ exports.createOrder = async (req, res, next) => {
 // @access  Private
 exports.getMyOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ clerkUserId: req.auth.userId }).sort({ createdAt: -1 });
+    const orders = await Order.find({ clerkUserId: req.user.clerkId }).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -129,7 +129,7 @@ exports.updateOrderStatus = async (req, res, next) => {
 // @access  Private
 exports.cancelOrder = async (req, res, next) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, clerkUserId: req.auth.userId });
+    const order = await Order.findOne({ _id: req.params.id, clerkUserId: req.user.clerkId });
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }

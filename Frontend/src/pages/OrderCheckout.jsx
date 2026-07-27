@@ -19,13 +19,28 @@ const OrderCheckout = () => {
       const token = await getToken();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       
+      const formattedItems = cart.reduce((acc, item) => {
+        const existing = acc.find(i => i.menuItem === item._id);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          acc.push({
+            menuItem: item._id,
+            name: item.name,
+            price: item.price,
+            quantity: 1
+          });
+        }
+        return acc;
+      }, []);
+
       const payload = {
         customerInfo: {
           name: `${e.target[2].value} ${e.target[3].value}`,
           email: user?.primaryEmailAddress?.emailAddress || 'guest@example.com'
         },
         orderType: 'delivery',
-        items: cart,
+        items: formattedItems,
         subtotal,
         tax: taxes,
         totalAmount: total,
