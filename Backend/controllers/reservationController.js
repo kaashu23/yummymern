@@ -92,11 +92,11 @@ const createReservation = async (req, res, next) => {
       <p>Your reservation request for <strong>${targetDate.toDateString()}</strong> at <strong>${timeSlot}</strong> for <strong>${partySize} people</strong> has been received and is currently Pending.</p>
       <p>We will send another email once it is Confirmed.</p>
     `;
-    await sendEmail({
+    sendEmail({
       email: req.user.email,
       subject: 'Yummy - Reservation Request Received',
       message: emailMessage
-    });
+    }).catch(e => console.error("Email failed:", e));
 
     // Notify admin asynchronously
     const adminEmail = process.env.EMAIL_USER;
@@ -111,11 +111,11 @@ const createReservation = async (req, res, next) => {
         <p><strong>Party Size:</strong> ${partySize}</p>
         <p><strong>Special Request:</strong> ${specialRequest || 'None'}</p>
       `;
-      await sendEmail({
+      sendEmail({
         email: adminEmail,
         subject: 'Yummy - New Reservation Request',
         message: adminMessage
-      });
+      }).catch(e => console.error("Admin email failed:", e));
     }
 
     res.status(201).json(reservation);

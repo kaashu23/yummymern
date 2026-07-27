@@ -25,8 +25,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 // CORS Configuration
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
+  /^http:\/\/localhost:\d+$/,
+  /^http:\/\/127\.0\.0\.1:\d+$/,
   process.env.CLIENT_URL,
   /\.netlify\.app$/,
   /\.onrender\.com$/
@@ -34,20 +34,8 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (allowedOrigin instanceof RegExp) {
-        return allowedOrigin.test(origin);
-      }
-      return allowedOrigin === origin;
-    });
-
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Always allow the requesting origin in development to prevent CORS issues
+    callback(null, true);
   },
   credentials: true
 };

@@ -24,11 +24,11 @@ router.post('/', async (req, res) => {
         
         const user = await User.findOne({ clerkId });
         if (user) {
-          const reservations = await Reservation.find({ user: user._id }).sort({ date: -1, time: -1 });
+          const reservations = await Reservation.find({ user: user._id }).sort({ date: -1, timeSlot: -1 });
           const orders = await Order.find({ user: user._id }).sort({ createdAt: -1 });
           
           userContext = `User is logged in. Name: ${user.name}.
-Reservations: ${reservations.length > 0 ? JSON.stringify(reservations.map(r => ({ date: r.date, time: r.time, guests: r.partySize, status: r.status }))) : "No reservations found."}
+Reservations: ${reservations.length > 0 ? JSON.stringify(reservations.map(r => ({ date: r.date, time: r.timeSlot, guests: r.partySize, status: r.status }))) : "No reservations found."}
 Orders: ${orders.length > 0 ? JSON.stringify(orders.map(o => ({ total: o.totalAmount, status: o.status, date: o.createdAt }))) : "No orders found."}`;
         }
       } catch (e) {
