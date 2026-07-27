@@ -25,7 +25,7 @@ const createMessage = async (req, res, next) => {
       <p>${message}</p>
     `;
 
-    sendEmail({
+    await sendEmail({
       email: process.env.EMAIL_USER, // Admin email
       subject: `New Contact Request: ${subject}`,
       message: emailMessage

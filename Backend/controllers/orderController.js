@@ -33,7 +33,7 @@ exports.createOrder = async (req, res, next) => {
         fs.mkdirSync(path.join(__dirname, '..', 'temp'));
       }
       
-      generateOrderPDF(order, filePath)
+      await generateOrderPDF(order, filePath)
         .then(() => {
           return sendEmail({
             email: customerInfo.email,

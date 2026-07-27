@@ -92,7 +92,7 @@ const createReservation = async (req, res, next) => {
       <p>Your reservation request for <strong>${targetDate.toDateString()}</strong> at <strong>${timeSlot}</strong> for <strong>${partySize} people</strong> has been received and is currently Pending.</p>
       <p>We will send another email once it is Confirmed.</p>
     `;
-    sendEmail({
+    await sendEmail({
       email: req.user.email,
       subject: 'Yummy - Reservation Request Received',
       message: emailMessage
@@ -111,7 +111,7 @@ const createReservation = async (req, res, next) => {
         <p><strong>Party Size:</strong> ${partySize}</p>
         <p><strong>Special Request:</strong> ${specialRequest || 'None'}</p>
       `;
-      sendEmail({
+      await sendEmail({
         email: adminEmail,
         subject: 'Yummy - New Reservation Request',
         message: adminMessage
@@ -190,9 +190,9 @@ const updateReservationStatus = async (req, res, next) => {
         <p>Dear ${reservation.guestName || reservation.user.name},</p>
         <p>Your reservation for <strong>${new Date(reservation.date).toDateString()}</strong> at <strong>${reservation.timeSlot}</strong> has been <strong>${status}</strong>.</p>
       `;
-      sendEmail({
+      await sendEmail({
         email: reservation.user.email,
-        subject: `Yummy - Reservation \${status}`,
+        subject: `Yummy - Reservation ${status}`,
         message: emailMessage
       });
     }
@@ -222,6 +222,23 @@ const deleteReservation = async (req, res, next) => {
     // Project plan says "DELETE /api/reservations/:id -> Cancel reservation (user or admin)"
     reservation.status = 'Cancelled';
     await reservation.save();
+
+    // Notify admin asynchronously
+    const adminEmail = process.env.EMAIL_USER;
+    if (adminEmail) {
+      const adminMessage = `
+        <h1>Reservation Cancelled</h1>
+        <p>A reservation has been cancelled.</p>
+        <p><strong>Guest Name:</strong> ${reservation.guestName}</p>
+        <p><strong>Date:</strong> ${new Date(reservation.date).toDateString()}</p>
+        <p><strong>Time:</strong> ${reservation.timeSlot}</p>
+      `;
+      await sendEmail({
+        email: adminEmail,
+        subject: 'Yummy - Reservation Cancelled',
+        message: adminMessage
+      });
+    }
 
     res.json({ message: 'Reservation cancelled', reservation });
   } catch (error) {

@@ -84,7 +84,7 @@ const OrderOnline = () => {
                       <p className="text-sm font-light text-white/50 mt-1">{item.description}</p>
                     </div>
                     <div className="flex items-center gap-6">
-                      <span className="font-['EB_Garamond'] text-xl text-[#c5a059]">₹{item.price.toLocaleString()}</span>
+                      <span className="font-['EB_Garamond'] text-xl text-[#c5a059]">₹{(item.price || 0).toLocaleString()}</span>
                       <button 
                         onClick={() => addToCart(item)}
                         className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:text-[#050505] hover:bg-[#c5a059] hover:border-[#c5a059] transition-all"
@@ -116,7 +116,7 @@ const OrderOnline = () => {
                 cart.map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center">
                     <span className="text-sm text-white/90">{item.name}</span>
-                    <span className="text-sm text-white/50">₹{item.price.toLocaleString()}</span>
+                    <span className="text-sm text-white/50">₹{(item.price || 0).toLocaleString()}</span>
                   </div>
                 ))
               )}

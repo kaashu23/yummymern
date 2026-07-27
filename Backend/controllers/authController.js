@@ -34,7 +34,7 @@ const clerkWebhookSync = async (req, res) => {
         const sendEmail = require('../utils/sendEmail');
         const adminEmail = process.env.EMAIL_USER;
         if (adminEmail) {
-          sendEmail({
+          await sendEmail({
             email: adminEmail,
             subject: 'Yummy - New User Registration',
             message: `<h1>New User Registered</h1>

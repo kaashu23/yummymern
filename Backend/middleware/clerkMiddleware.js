@@ -41,7 +41,7 @@ const clerkMiddleware = async (req, res, next) => {
         const sendEmail = require('../utils/sendEmail');
         const adminEmail = process.env.EMAIL_USER;
         if (adminEmail) {
-          sendEmail({
+          await sendEmail({
             email: adminEmail,
             subject: 'Yummy - New User Registration (Local Fallback)',
             message: `<h1>New User Registered (Fallback)</h1>

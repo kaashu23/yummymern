@@ -1,6 +1,41 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
+import api from '../utils/axios';
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const response = await api.post('/contact', formData);
+      if (response.data.success) {
+        toast.success('Message sent successfully!');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send message');
+      console.error('Contact submit error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-[#050505] text-[#f5f5f5] selection:bg-[#c5a059]/30 pt-40 pb-32 px-6 md:px-16 overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-20">
@@ -55,11 +90,16 @@ const Contact = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#0a0a0a] border border-white/5 p-8 md:p-12 rounded-2xl flex flex-col gap-8"
+            onSubmit={handleSubmit}
           >
             <div className="flex flex-col gap-2">
               <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Name</label>
               <input 
                 type="text" 
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
                 className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors"
                 placeholder="John Doe"
               />
@@ -68,6 +108,10 @@ const Contact = () => {
               <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Email</label>
               <input 
                 type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
                 className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors"
                 placeholder="john@example.com"
               />
@@ -76,6 +120,10 @@ const Contact = () => {
               <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Subject</label>
               <input 
                 type="text" 
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                required
                 className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors"
                 placeholder="Private Dining Inquiry"
               />
@@ -84,13 +132,21 @@ const Contact = () => {
               <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Message</label>
               <textarea 
                 rows="4"
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
+                required
                 className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors resize-none"
                 placeholder="How can we help you?"
               ></textarea>
             </div>
             
-            <button type="submit" className="mt-4 bg-white text-[#050505] font-bold text-[10px] uppercase tracking-[0.2em] py-4 rounded-full hover:bg-[#c5a059] hover:text-white transition-colors duration-500 w-full md:w-auto md:px-12 md:self-start">
-              Send Message
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="mt-4 bg-white text-[#050505] font-bold text-[10px] uppercase tracking-[0.2em] py-4 rounded-full hover:bg-[#c5a059] hover:text-white transition-colors duration-500 w-full md:w-auto md:px-12 md:self-start disabled:opacity-50"
+            >
+              {loading ? 'Sending...' : 'Send Message'}
             </button>
           </motion.form>
         </div>
