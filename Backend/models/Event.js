@@ -20,6 +20,10 @@ const eventSchema = new mongoose.Schema({
   },
   seatsAvailable: {
     type: Number
+  },
+  price: {
+    type: Number,
+    default: 0
   }
 }, { timestamps: true });
 

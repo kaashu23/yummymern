@@ -18,7 +18,7 @@ const getEvents = async (req, res, next) => {
 // @access  Private/Admin
 const createEvent = async (req, res, next) => {
   try {
-    const { title, description, date, time, seatsAvailable } = req.body;
+    const { title, description, date, time, seatsAvailable, price } = req.body;
     let imageUrl = '';
 
     if (req.file) {
@@ -36,6 +36,7 @@ const createEvent = async (req, res, next) => {
       date,
       time,
       seatsAvailable,
+      price: price ? Number(price) : 0,
       image: imageUrl
     });
 
@@ -55,13 +56,14 @@ const updateEvent = async (req, res, next) => {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    const { title, description, date, time, seatsAvailable } = req.body;
+    const { title, description, date, time, seatsAvailable, price } = req.body;
     
     if (title) event.title = title;
     if (description) event.description = description;
     if (date) event.date = date;
     if (time) event.time = time;
     if (seatsAvailable !== undefined) event.seatsAvailable = seatsAvailable;
+    if (price !== undefined) event.price = Number(price);
 
     if (req.file) {
       const result = await imagekit.upload({

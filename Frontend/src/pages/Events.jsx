@@ -63,7 +63,7 @@ const Events = () => {
                   transition={{ duration: 1, delay: index * 0.2, ease: [0.16, 1, 0.3, 1] }}
                   className="group cursor-pointer"
                 >
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-xl mb-8 border border-white/5">
+                  <div className="relative aspect-[3/2] sm:aspect-[16/10] overflow-hidden rounded-xl mb-6 border border-white/5 shadow-2xl">
                     <div className="absolute inset-0 bg-[#050505]/20 group-hover:bg-transparent transition-colors duration-700 z-10"></div>
                     {event.image && (
                       <img 
@@ -91,7 +91,7 @@ const Events = () => {
                   </p>
                   
                   <button className="text-[10px] uppercase tracking-[0.3em] text-white hover:text-[#c5a059] transition-colors border-b border-white/20 hover:border-[#c5a059] pb-1">
-                    Reserve Seats (₹{event.price.toLocaleString()})
+                    Reserve Seats (₹{(event.price || 0).toLocaleString()})
                   </button>
                 </motion.div>
               ))}

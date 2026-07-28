@@ -12,7 +12,7 @@ const tableSchema = new mongoose.Schema({
   },
   location: {
     type: String,
-    enum: ['Indoor', 'Outdoor', 'Rooftop']
+    enum: ['Indoor', 'Outdoor', 'Rooftop', 'Bar', 'Patio']
   },
   isActive: {
     type: Boolean,

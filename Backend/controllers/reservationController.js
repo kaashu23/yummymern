@@ -43,8 +43,13 @@ const getAvailability = async (req, res, next) => {
     }
 
     const availableTables = await checkAvailability(date, timeSlot, Number(partySize));
+    const allTables = await Table.find({ isActive: true }).sort('tableNumber');
 
-    res.json({ available: availableTables.length > 0, tables: availableTables });
+    res.json({ 
+      available: availableTables.length > 0, 
+      tables: availableTables,
+      allTables: allTables
+    });
   } catch (error) {
     next(error);
   }

@@ -56,11 +56,15 @@ const MenuItemDetail = () => {
             className="w-full md:w-1/2 flex flex-col gap-6"
           >
             <div className="aspect-square overflow-hidden rounded-2xl border border-white/5 bg-[#111]">
-              <img 
-                src={item.image} 
-                alt={item.name} 
-                className="w-full h-full object-cover"
-              />
+              {(item.image || (item.images && item.images.length > 0)) ? (
+                <img 
+                  src={item.image || item.images[0]} 
+                  alt={item.name} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white/20 italic">No Image</div>
+              )}
             </div>
           </motion.div>
 

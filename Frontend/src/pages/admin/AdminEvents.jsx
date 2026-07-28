@@ -14,7 +14,9 @@ const AdminEvents = () => {
     description: '',
     date: '',
     time: '',
+    time: '',
     seatsAvailable: '',
+    price: '',
     image: null
   });
 
@@ -35,7 +37,7 @@ const AdminEvents = () => {
 
   const handleOpenAdd = () => {
     setEditingId(null);
-    setFormData({ title: '', description: '', date: '', time: '', seatsAvailable: '', image: null });
+    setFormData({ title: '', description: '', date: '', time: '', seatsAvailable: '', price: '', image: null });
     setIsModalOpen(true);
   };
 
@@ -47,7 +49,9 @@ const AdminEvents = () => {
       description: event.description || '', 
       date: eventDate, 
       time: event.time || '', 
+      time: event.time || '', 
       seatsAvailable: event.seatsAvailable || '',
+      price: event.price || '',
       image: null // Can't pre-fill file input
     });
     setIsModalOpen(true);
@@ -91,6 +95,7 @@ const AdminEvents = () => {
       fd.append('date', formData.date);
       fd.append('time', formData.time);
       fd.append('seatsAvailable', formData.seatsAvailable);
+      fd.append('price', formData.price);
       if (formData.image) {
         fd.append('image', formData.image);
       }
@@ -152,7 +157,9 @@ const AdminEvents = () => {
               <p className="text-sm font-light text-white/50 mb-1">
                 {event.date ? new Date(event.date).toLocaleDateString() : ''} {event.time ? `• ${event.time}` : ''}
               </p>
-              <p className="text-sm font-light text-white/50 mb-4">Seats: {event.seatsAvailable}</p>
+              <p className="text-sm font-light text-white/50 mb-4">
+                Seats: {event.seatsAvailable} | Price: ₹{event.price || 0}
+              </p>
               <div className="flex gap-4">
                 <button onClick={() => handleOpenEdit(event)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
                 <button onClick={() => handleDelete(event._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
@@ -202,9 +209,15 @@ const AdminEvents = () => {
                     <input type="text" placeholder="e.g. 19:00" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#c5a059] outline-none" />
                   </div>
                 </div>
-                <div className="flex flex-col">
-                  <label className="text-xs uppercase tracking-widest text-white/50 mb-2">Seats Available</label>
-                  <input type="number" min="1" value={formData.seatsAvailable} onChange={e => setFormData({...formData, seatsAvailable: e.target.value})} className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#c5a059] outline-none" />
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col flex-1">
+                    <label className="text-xs uppercase tracking-widest text-white/50 mb-2">Seats Available</label>
+                    <input type="number" min="1" value={formData.seatsAvailable} onChange={e => setFormData({...formData, seatsAvailable: e.target.value})} className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#c5a059] outline-none" />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <label className="text-xs uppercase tracking-widest text-white/50 mb-2">Price (₹)</label>
+                    <input type="number" min="0" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full bg-transparent border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#c5a059] outline-none" />
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <label className="text-xs uppercase tracking-widest text-white/50 mb-2">Event Image {editingId && "(Optional to replace)"}</label>

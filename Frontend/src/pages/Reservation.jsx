@@ -23,6 +23,7 @@ const Reservation = () => {
   });
   const [isMapActive, setIsMapActive] = useState(false);
   const [availableTables, setAvailableTables] = useState([]);
+  const [allTables, setAllTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,14 +55,24 @@ const Reservation = () => {
         }
       });
       
-      if (!res.data.available) {
+      if (!res.data.available && res.data.allTables?.length > 0) {
+        // If there are tables in the DB but none available, still show the map so they see it's full!
+        setAvailableTables([]);
+        setAllTables(res.data.allTables);
+        setIsMapActive(true);
+        setSelectedTable(null);
+        toast.error('No tables available for this time and party size.');
+        return;
+      } else if (!res.data.available) {
         toast.error('No tables available for this time and party size.');
         setIsMapActive(false);
         setAvailableTables([]);
+        setAllTables([]);
         return;
       }
       
       setAvailableTables(res.data.tables);
+      setAllTables(res.data.allTables || []);
       setIsMapActive(true);
       setSelectedTable(null); // Reset selection
     } catch (error) {
@@ -112,7 +123,7 @@ const Reservation = () => {
   };
 
   const getTableId = (tableNumber) => {
-    const t = availableTables.find(t => t.tableNumber === tableNumber);
+    const t = allTables.find(t => t.tableNumber === tableNumber);
     return t ? t._id : null;
   };
 
@@ -244,7 +255,7 @@ const Reservation = () => {
                     <div 
                       className={`w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-300 ${
                         !isTableAvailable(12) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
-                        selectedTable?.tableNumber === 12 ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
+                        selectedTable?.id === getTableId(12) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
                       }`} 
                       onClick={() => isTableAvailable(12) && selectTable(getTableId(12), 'Table 12', 'Rooftop')}
                     >
@@ -261,7 +272,7 @@ const Reservation = () => {
                           key={tNum}
                           className={`w-12 h-8 rounded border flex items-center justify-center text-xs transition-all duration-300 ${
                             !isTableAvailable(tNum) ? 'border-white/5 bg-white/5 cursor-not-allowed text-white/20' : 
-                            selectedTable?.tableNumber === tNum ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
+                            selectedTable?.id === getTableId(tNum) ? 'border-[#c5a059] bg-[#c5a059]/20 text-[#c5a059]' : 'border-white/20 hover:border-[#c5a059]/50 text-white/50 cursor-pointer'
                           }`} 
                           onClick={() => isTableAvailable(tNum) && selectTable(getTableId(tNum), `Table 0${tNum}`, 'Terrace')}
                         >

@@ -13,10 +13,10 @@ const MenuCard = ({ item }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-10 relative z-10 text-[#f5f5f5]">
         
         <div className="flex-1 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
-          {item.image && (
+          {(item.image || (item.images && item.images.length > 0)) && (
             <div className="w-24 h-24 md:w-32 md:h-32 shrink-0 overflow-hidden rounded-md bg-[#111] border border-white/5 relative">
               <img 
-                src={item.image} 
+                src={item.image || item.images[0]} 
                 alt={item.name} 
                 className="w-full h-full object-cover filter brightness-75 group-hover:brightness-110 group-hover:scale-105 transition-all duration-700" 
               />
