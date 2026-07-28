@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const { getToken } = useAuth();
 
   const fetchOrders = async () => {
@@ -26,6 +27,33 @@ const AdminOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedOrders = [...orders].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    if (sortConfig.key === 'customerName') {
+      valA = a.customerInfo?.name || '';
+      valB = b.customerInfo?.name || '';
+    } else if (sortConfig.key === 'totalAmount') {
+      valA = Number(a.totalAmount) || 0;
+      valB = Number(b.totalAmount) || 0;
+    }
+
+    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   const updateStatus = async (id, status) => {
     try {
@@ -80,16 +108,16 @@ const AdminOrders = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/[0.02]">
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Order ID</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Customer</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Type</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Total</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Status</th>
+                <th onClick={() => handleSort('_id')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Order ID {sortConfig.key === '_id' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('customerName')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Customer {sortConfig.key === 'customerName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('orderType')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Type {sortConfig.key === 'orderType' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('totalAmount')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Total {sortConfig.key === 'totalAmount' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('status')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Status {sortConfig.key === 'status' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
                 <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {orders.map((ord) => (
+              {sortedOrders.map((ord) => (
                 <tr key={ord._id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-6 py-6 text-xs text-white/40">{ord._id.substring(0, 8)}...</td>
                   <td className="px-6 py-6 text-sm text-white/90">{ord.customerInfo?.name || 'Guest'}</td>

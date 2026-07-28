@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminMenu = () => {
   const [menuItems, setMenuItems] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { getToken } = useAuth();
@@ -31,6 +32,36 @@ const AdminMenu = () => {
   useEffect(() => {
     fetchItems();
   }, []);
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedMenuItems = [...menuItems].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    if (sortConfig.key === 'categoryName') {
+      valA = a.category?.name || '';
+      valB = b.category?.name || '';
+    } else if (sortConfig.key === 'price') {
+      valA = Number(a.price) || 0;
+      valB = Number(b.price) || 0;
+    } else if (sortConfig.key === 'name') {
+      valA = a.name ? a.name.toLowerCase() : '';
+      valB = b.name ? b.name.toLowerCase() : '';
+    }
+
+    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   const handleOpenAdd = () => {
     setEditingId(null);
@@ -147,15 +178,15 @@ const AdminMenu = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/[0.02]">
-                <th className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Item</th>
-                <th className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Category</th>
-                <th className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Price</th>
-                <th className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Status</th>
+                <th onClick={() => handleSort('name')} className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Item {sortConfig.key === 'name' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('categoryName')} className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Category {sortConfig.key === 'categoryName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('price')} className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Price {sortConfig.key === 'price' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('isAvailable')} className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Status {sortConfig.key === 'isAvailable' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
                 <th className="px-8 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {menuItems.map((item, idx) => (
+              {sortedMenuItems.map((item, idx) => (
                 <tr key={item._id || idx} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-8 py-6">
                     <div className="text-sm text-white/90">{item.name}</div>

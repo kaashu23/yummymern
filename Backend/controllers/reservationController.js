@@ -130,12 +130,22 @@ const createReservation = async (req, res, next) => {
 const getMyReservations = async (req, res, next) => {
   try {
     // Automatically mark past reservations as Completed
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    await Reservation.updateMany(
-      { date: { $lt: today }, status: { $nin: ['Completed', 'Cancelled'] } },
-      { $set: { status: 'Completed' } }
-    );
+    const now = new Date();
+    const activeReservations = await Reservation.find({
+      status: { $nin: ['Completed', 'Cancelled'] }
+    });
+    
+    for (let r of activeReservations) {
+      const dateStr = r.date.toISOString().split('T')[0];
+      const timeStr = r.timeSlot.length === 5 ? r.timeSlot : r.timeSlot.split(' ')[0]; // Handle "18:00" or "18:00 - 20:00"
+      const resDateTime = new Date(`${dateStr}T${timeStr}:00`);
+      
+      // If the reservation date/time has passed, mark it as Completed
+      if (resDateTime < now) {
+        r.status = 'Completed';
+        await r.save();
+      }
+    }
 
     const reservations = await Reservation.find({ user: req.user._id })
       .populate('table', 'tableNumber location')
@@ -152,12 +162,22 @@ const getMyReservations = async (req, res, next) => {
 const getReservations = async (req, res, next) => {
   try {
     // Automatically mark past reservations as Completed
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    await Reservation.updateMany(
-      { date: { $lt: today }, status: { $nin: ['Completed', 'Cancelled'] } },
-      { $set: { status: 'Completed' } }
-    );
+    const now = new Date();
+    const activeReservations = await Reservation.find({
+      status: { $nin: ['Completed', 'Cancelled'] }
+    });
+    
+    for (let r of activeReservations) {
+      const dateStr = r.date.toISOString().split('T')[0];
+      const timeStr = r.timeSlot.length === 5 ? r.timeSlot : r.timeSlot.split(' ')[0]; // Handle "18:00" or "18:00 - 20:00"
+      const resDateTime = new Date(`${dateStr}T${timeStr}:00`);
+      
+      // If the reservation date/time has passed, mark it as Completed
+      if (resDateTime < now) {
+        r.status = 'Completed';
+        await r.save();
+      }
+    }
 
     const { date, status } = req.query;
     let query = {};

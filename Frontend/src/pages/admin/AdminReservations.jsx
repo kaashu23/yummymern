@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminReservations = () => {
   const [reservations, setReservations] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const { getToken } = useAuth();
 
   const fetchReservations = async () => {
@@ -26,6 +27,33 @@ const AdminReservations = () => {
   useEffect(() => {
     fetchReservations();
   }, []);
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedReservations = [...reservations].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    let valA = a[sortConfig.key];
+    let valB = b[sortConfig.key];
+
+    if (sortConfig.key === 'guestName') {
+      valA = a.guestName || (a.user && a.user.name) || '';
+      valB = b.guestName || (b.user && b.user.name) || '';
+    } else if (sortConfig.key === 'date') {
+      valA = new Date(a.date).getTime();
+      valB = new Date(b.date).getTime();
+    }
+
+    if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   const updateStatus = async (id, status) => {
     try {
@@ -102,16 +130,16 @@ const AdminReservations = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-white/[0.02]">
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">ID</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Guest</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Time</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Party</th>
-                <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30">Status</th>
+                <th onClick={() => handleSort('_id')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">ID {sortConfig.key === '_id' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('guestName')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Guest {sortConfig.key === 'guestName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('date')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Time {sortConfig.key === 'date' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('partySize')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Party {sortConfig.key === 'partySize' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                <th onClick={() => handleSort('status')} className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 cursor-pointer hover:text-white/60">Status {sortConfig.key === 'status' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
                 <th className="px-6 py-4 text-[10px] uppercase tracking-[0.2em] text-white/30 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {reservations.map((res) => (
+              {sortedReservations.map((res) => (
                 <tr key={res._id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-6 py-6 text-xs text-white/40">{res._id.substring(0,8)}...</td>
                   <td className="px-6 py-6 text-sm text-white/90">{res.guestName || (res.user && res.user.name) || 'Guest'}</td>
