@@ -129,6 +129,14 @@ const createReservation = async (req, res, next) => {
 // @access  Private
 const getMyReservations = async (req, res, next) => {
   try {
+    // Automatically mark past reservations as Completed
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    await Reservation.updateMany(
+      { date: { $lt: today }, status: { $nin: ['Completed', 'Cancelled'] } },
+      { $set: { status: 'Completed' } }
+    );
+
     const reservations = await Reservation.find({ user: req.user._id })
       .populate('table', 'tableNumber location')
       .sort('-createdAt');
@@ -143,6 +151,14 @@ const getMyReservations = async (req, res, next) => {
 // @access  Private/Admin
 const getReservations = async (req, res, next) => {
   try {
+    // Automatically mark past reservations as Completed
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    await Reservation.updateMany(
+      { date: { $lt: today }, status: { $nin: ['Completed', 'Cancelled'] } },
+      { $set: { status: 'Completed' } }
+    );
+
     const { date, status } = req.query;
     let query = {};
 

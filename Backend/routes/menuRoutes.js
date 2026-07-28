@@ -7,6 +7,7 @@ const {
   updateMenuItem,
   deleteMenuItem
 } = require('../controllers/menuController');
+const { adminMiddleware } = require('../middleware/adminMiddleware');
 
 const router = express.Router();
 
@@ -18,11 +19,11 @@ const upload = multer({
 
 router.route('/')
   .get(getMenuItems)
-  .post(upload.single('image'), createMenuItem); // TODO: Add adminMiddleware
+  .post(adminMiddleware, upload.single('image'), createMenuItem);
 
 router.route('/:id')
   .get(getMenuItemById)
-  .put(upload.single('image'), updateMenuItem) // TODO: Add adminMiddleware
-  .delete(deleteMenuItem); // TODO: Add adminMiddleware
+  .put(adminMiddleware, upload.single('image'), updateMenuItem)
+  .delete(adminMiddleware, deleteMenuItem);
 
 module.exports = router;

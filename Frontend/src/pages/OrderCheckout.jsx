@@ -36,7 +36,7 @@ const OrderCheckout = () => {
 
       const payload = {
         customerInfo: {
-          name: `${e.target[2].value} ${e.target[3].value}`,
+          name: user?.fullName || `${e.target.firstName.value} ${e.target.lastName.value}`,
           email: user?.primaryEmailAddress?.emailAddress || 'guest@example.com'
         },
         orderType: 'delivery',
@@ -44,7 +44,11 @@ const OrderCheckout = () => {
         subtotal,
         tax: taxes,
         totalAmount: total,
-        deliveryAddress: `${e.target[4].value}, ${e.target[5].value}, ${e.target[6].value}`
+        deliveryAddress: {
+          street: e.target.street.value,
+          city: e.target.city.value,
+          zipCode: e.target.zipCode.value
+        }
       };
 
       const response = await fetch(`${apiUrl}/orders`, {
@@ -105,11 +109,11 @@ const OrderCheckout = () => {
           <div className="space-y-6">
             <h3 className="text-xs uppercase tracking-[0.3em] text-white/60 border-b border-white/10 pb-4">Delivery Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input type="text" required placeholder="First Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
-              <input type="text" required placeholder="Last Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
-              <input type="text" required placeholder="Street Address" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors md:col-span-2" />
-              <input type="text" required placeholder="City" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
-              <input type="text" required placeholder="ZIP Code" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input id="firstName" name="firstName" type="text" required placeholder="First Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input id="lastName" name="lastName" type="text" required placeholder="Last Name" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input id="street" name="street" type="text" required placeholder="Street Address" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors md:col-span-2" />
+              <input id="city" name="city" type="text" required placeholder="City" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
+              <input id="zipCode" name="zipCode" type="text" required placeholder="ZIP Code" className="w-full bg-transparent border-b border-white/10 focus:border-[#c5a059] outline-none py-3 text-white transition-colors" />
             </div>
           </div>
 

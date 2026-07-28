@@ -6,14 +6,16 @@ const {
   deleteTable
 } = require('../controllers/tableController');
 
+const { adminMiddleware } = require('../middleware/adminMiddleware');
+
 const router = express.Router();
 
 router.route('/')
   .get(getTables)
-  .post(createTable); // TODO: Add adminMiddleware
+  .post(adminMiddleware, createTable);
 
 router.route('/:id')
-  .put(updateTable) // TODO: Add adminMiddleware
-  .delete(deleteTable); // TODO: Add adminMiddleware
+  .put(adminMiddleware, updateTable)
+  .delete(adminMiddleware, deleteTable);
 
 module.exports = router;

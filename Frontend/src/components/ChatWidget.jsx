@@ -63,7 +63,7 @@ const ChatWidget = () => {
   return (
     <>
       <button 
-        className="chat-toggle-btn"
+        className={`chat-toggle-btn ${isOpen ? 'open' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle chat assistant"
       >
@@ -86,6 +86,12 @@ const ChatWidget = () => {
                 <span className="material-symbols-outlined">restaurant_menu</span>
                 <h3>Yummy AI Concierge</h3>
               </div>
+              <button 
+                className="chat-close-btn md-hidden"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
             </div>
             
             <div className="chat-messages">

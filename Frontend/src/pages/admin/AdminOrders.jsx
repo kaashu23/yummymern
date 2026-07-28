@@ -105,10 +105,10 @@ const AdminOrders = () => {
                       className="bg-[#0a0a0a] border border-white/10 rounded px-2 py-1 text-xs text-white/70 focus:border-[#c5a059] outline-none"
                     >
                       <option value="pending">Pending</option>
-                      <option value="Preparing">Preparing</option>
-                      <option value="Ready">Ready</option>
-                      <option value="Out for Delivery">Out for Delivery</option>
-                      <option value="completed">Completed</option>
+                      <option value="preparing">Preparing</option>
+                      <option value="ready">Ready</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
