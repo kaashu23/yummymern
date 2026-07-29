@@ -15,6 +15,7 @@ import Gallery from './pages/Gallery';
 import Events from './pages/Events';
 import Chefs from './pages/Chefs';
 import Contact from './pages/Contact';
+import LeaveReview from './pages/LeaveReview';
 
 // Admin Imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -57,6 +58,7 @@ function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/chefs" element={<Chefs />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/leave-review" element={<LeaveReview />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>

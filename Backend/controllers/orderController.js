@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const generateEmailTemplate = require('../utils/emailTemplate');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -35,10 +36,19 @@ exports.createOrder = async (req, res, next) => {
       
       generateOrderPDF(order, filePath)
         .then(() => {
+          const htmlContent = generateEmailTemplate(
+            'Thank you for your order!',
+            `
+              <p>Hi ${customerInfo.name || 'Guest'},</p>
+              <p>We have successfully received your order and are currently preparing it with the utmost care.</p>
+              <p>Your complete order receipt is attached to this email as a PDF document for your reference.</p>
+            `
+          );
+
           return sendEmail({
             email: customerInfo.email,
-            subject: 'Your Yummy Order Receipt',
-            message: `<h1>Thank you for your order!</h1><p>Hi ${customerInfo.name || 'Guest'}, your order receipt is attached as a PDF.</p>`,
+            subject: 'Yummy - Your Order Receipt',
+            message: htmlContent,
             attachments: [{ filename: `Receipt-${order._id}.pdf`, path: filePath }]
           });
         })
@@ -103,11 +113,14 @@ exports.getOrders = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateOrderStatus = async (req, res, next) => {
   try {
-    const { status } = req.body;
+    const updateData = { status };
+    if (status === 'delivered') {
+      updateData.completedAt = new Date();
+    }
 
     const order = await Order.findByIdAndUpdate(
       req.params.id,
-      { status },
+      updateData,
       { new: true, runValidators: true }
     );
 

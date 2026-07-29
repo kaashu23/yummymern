@@ -7,6 +7,8 @@ const AdminTestimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [activeTab, setActiveTab] = useState('Featured');
+  const [delayMinutes, setDelayMinutes] = useState(120);
   const { getToken } = useAuth();
   
   const [formData, setFormData] = useState({
@@ -28,8 +30,24 @@ const AdminTestimonials = () => {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      const token = await getToken();
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${apiUrl}/admin/settings`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const delaySetting = data.find(s => s.key === 'REVIEW_EMAIL_DELAY_MINUTES');
+      if (delaySetting) setDelayMinutes(delaySetting.value);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchTestimonials();
+    fetchSettings();
   }, []);
 
   const handleOpenAdd = () => {
@@ -96,6 +114,54 @@ const AdminTestimonials = () => {
     }
   };
 
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      toast.loading("Updating status...", { id: 'status' });
+      const token = await getToken();
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const fd = new FormData();
+      fd.append('status', status);
+      const res = await fetch(`${apiUrl}/testimonials/${id}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: fd
+      });
+      if (res.ok) {
+        toast.success("Updated successfully", { id: 'status' });
+        fetchTestimonials();
+      } else {
+        toast.error("Failed to update status", { id: 'status' });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating status", { id: 'status' });
+    }
+  };
+
+  const handleSaveDelay = async () => {
+    try {
+      toast.loading("Saving settings...", { id: 'settings' });
+      const token = await getToken();
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const res = await fetch(`${apiUrl}/admin/settings`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ key: 'REVIEW_EMAIL_DELAY_MINUTES', value: delayMinutes })
+      });
+      if (res.ok) {
+        toast.success("Settings saved", { id: 'settings' });
+      } else {
+        toast.error("Failed to save settings", { id: 'settings' });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error saving settings", { id: 'settings' });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -154,13 +220,42 @@ const AdminTestimonials = () => {
         </button>
       </motion.header>
 
+      <div className="flex gap-4 border-b border-white/10 pb-4">
+        {['Featured', 'Pending', 'Settings'].map(tab => (
+          <button 
+            key={tab} 
+            onClick={() => setActiveTab(tab)}
+            className={`text-xs uppercase tracking-widest transition-colors ${activeTab === tab ? 'text-[#c5a059]' : 'text-white/40 hover:text-white/80'}`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'Settings' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-[#0a0a0a] border border-white/5 p-8 rounded-2xl">
+          <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-4">Automated Review Collection</h3>
+          <p className="text-white/50 text-sm font-light mb-6">Set how long to wait after an order or reservation is completed before sending a review request email.</p>
+          <div className="flex gap-4 items-end">
+            <div className="flex flex-col gap-2 w-48">
+              <label className="text-[10px] uppercase tracking-widest text-white/40">Delay in Minutes</label>
+              <input type="number" value={delayMinutes} onChange={e => setDelayMinutes(e.target.value)} className="bg-transparent border-b border-white/20 text-white focus:border-[#c5a059] outline-none py-2" />
+            </div>
+            <button onClick={handleSaveDelay} className="px-6 py-2 bg-white/10 text-white rounded-lg hover:bg-[#c5a059] hover:text-[#050505] transition-colors text-xs uppercase tracking-widest">
+              Save Delay
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {(activeTab === 'Featured' || activeTab === 'Pending') && (
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        {testimonials.map((review) => (
+        {testimonials.filter(t => activeTab === 'Pending' ? t.status === 'Pending' : t.status !== 'Pending').map((review) => (
           <div key={review._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-4">
@@ -181,17 +276,26 @@ const AdminTestimonials = () => {
               </div>
               <p className="text-sm font-light text-white/50 italic mb-6">"{review.quote}"</p>
             </div>
-            <div className="flex justify-end gap-4 border-t border-white/10 pt-4">
-              <button onClick={() => handleToggleFeatured(review._id, review.isFeatured)} className="text-xs text-[#c5a059] hover:text-white transition-colors">{review.isFeatured ? 'Unfeature' : 'Feature'}</button>
+            <div className="flex justify-end gap-4 border-t border-white/10 pt-4 flex-wrap">
+              {review.status === 'Pending' && (
+                <>
+                  <button onClick={() => handleUpdateStatus(review._id, 'Approved')} className="text-xs text-green-400 hover:text-green-300 transition-colors">Approve</button>
+                  <button onClick={() => handleUpdateStatus(review._id, 'Rejected')} className="text-xs text-red-400 hover:text-red-300 transition-colors">Reject</button>
+                </>
+              )}
+              {review.status === 'Approved' && (
+                <button onClick={() => handleToggleFeatured(review._id, review.isFeatured)} className="text-xs text-[#c5a059] hover:text-white transition-colors">{review.isFeatured ? 'Unfeature' : 'Feature'}</button>
+              )}
               <button onClick={() => handleOpenEdit(review)} className="text-xs text-white/60 hover:text-white transition-colors">Edit</button>
               <button onClick={() => handleDelete(review._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
             </div>
           </div>
         ))}
-        {testimonials.length === 0 && (
-          <div className="col-span-full p-8 text-center text-white/50">No testimonials found.</div>
+        {testimonials.filter(t => activeTab === 'Pending' ? t.status === 'Pending' : t.status !== 'Pending').length === 0 && (
+          <div className="col-span-full p-8 text-center text-white/50">No {activeTab.toLowerCase()} testimonials found.</div>
         )}
       </motion.div>
+      )}
 
       {/* Modal */}
       <AnimatePresence>

@@ -11,9 +11,13 @@ const connectDB = require('./config/db');
 const Sentry = require('@sentry/node');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const initCron = require('./cron/reviewCron');
 
 // Connect Database
 connectDB();
+
+// Init Background Jobs
+initCron();
 
 const app = express();
 

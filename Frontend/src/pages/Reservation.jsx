@@ -103,7 +103,8 @@ const Reservation = () => {
         timeSlot: formData.timeSlot,
         partySize: parseInt(formData.partySize.split(' ')[0]),
         tableId: selectedTable.id,
-        guestName: user?.fullName || 'Guest'
+        guestName: user?.fullName || 'Guest',
+        guestEmail: user?.primaryEmailAddress?.emailAddress
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });

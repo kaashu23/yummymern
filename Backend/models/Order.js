@@ -62,6 +62,13 @@ const orderSchema = new mongoose.Schema({
   },
   stripePaymentIntentId: {
     type: String
+  },
+  reviewEmailSent: {
+    type: Boolean,
+    default: false
+  },
+  completedAt: {
+    type: Date
   }
 }, {
   timestamps: true

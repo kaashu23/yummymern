@@ -12,6 +12,9 @@ const reservationSchema = new mongoose.Schema({
   guestName: {
     type: String
   },
+  guestEmail: {
+    type: String
+  },
   guestPhone: {
     type: String
   },
@@ -34,6 +37,13 @@ const reservationSchema = new mongoose.Schema({
   },
   specialRequest: {
     type: String
+  },
+  reviewEmailSent: {
+    type: Boolean,
+    default: false
+  },
+  completedAt: {
+    type: Date
   }
 }, { timestamps: true });
 

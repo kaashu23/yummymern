@@ -20,6 +20,11 @@ const testimonialSchema = new mongoose.Schema({
   isFeatured: {
     type: Boolean,
     default: false
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected'],
+    default: 'Pending'
   }
 }, { timestamps: true });
 

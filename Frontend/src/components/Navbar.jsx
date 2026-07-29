@@ -48,7 +48,7 @@ const Navbar = () => {
             <UserButton appearance={{ elements: { avatarBox: "w-7 h-7 md:w-8 md:h-8 rounded-full border border-white/20" } }} />
           </SignedIn>
           <SignedOut>
-            <button onClick={() => openSignIn()} className="font-['Manrope'] text-xs uppercase tracking-[0.2em] text-white/60 hover:text-white transition-colors duration-500 hidden md:block">Login</button>
+            <button onClick={() => openSignIn()} className="font-['Manrope'] text-[10px] md:text-xs uppercase tracking-[0.2em] text-[#c5a059] md:text-white/60 hover:text-white transition-colors duration-500 mr-2 md:mr-0">Login</button>
           </SignedOut>
           <button onClick={() => navigate('/order-online')} className="font-['Manrope'] text-[10px] md:text-xs uppercase tracking-[0.2em] text-white bg-transparent border border-white/20 px-6 py-3 rounded-full hover:bg-white hover:text-[#050505] transition-all duration-500 hidden lg:block">
             Order Online
@@ -101,11 +101,6 @@ const Navbar = () => {
                   <Link onClick={closeMenu} className="font-['Manrope'] text-xs uppercase tracking-[0.2em] text-[#c5a059] hover:text-white" to="/admin/dashboard">Admin Dashboard</Link>
                 )}
               </SignedIn>
-              
-              <SignedOut>
-                <div className="h-[1px] w-full bg-white/10 my-4"></div>
-                <button onClick={() => { closeMenu(); openSignIn(); }} className="font-['Manrope'] text-left text-xs uppercase tracking-[0.2em] text-[#c5a059] hover:text-white">Sign In</button>
-              </SignedOut>
             </nav>
           </motion.div>
         )}

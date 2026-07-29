@@ -17,8 +17,18 @@ exports.getReviews = async (req, res, next) => {
 // @access  Private
 exports.createReview = async (req, res, next) => {
   try {
-    // Ideally we attach the user from clerk token
     const review = await Review.create(req.body);
+    
+    // Auto-create a pending Testimonial for admin to approve
+    const Testimonial = require('../models/Testimonial');
+    const guestName = req.body.guestName || (req.user ? req.user.name : 'Guest');
+    await Testimonial.create({
+      guestName,
+      rating: review.rating,
+      quote: review.comment,
+      status: 'Pending'
+    });
+
     res.status(201).json({ success: true, data: review });
   } catch (error) {
     next(error);

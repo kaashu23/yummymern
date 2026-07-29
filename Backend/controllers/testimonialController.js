@@ -40,7 +40,8 @@ const createTestimonial = async (req, res, next) => {
       rating,
       quote,
       isFeatured: isFeatured === 'true' || isFeatured === true,
-      photo: photoUrl
+      photo: photoUrl,
+      status: req.body.status || 'Pending'
     });
 
     res.status(201).json(testimonial);
@@ -59,12 +60,13 @@ const updateTestimonial = async (req, res, next) => {
       return res.status(404).json({ message: 'Testimonial not found' });
     }
 
-    const { guestName, rating, quote, isFeatured } = req.body;
+    const { guestName, rating, quote, isFeatured, status } = req.body;
     
     if (guestName) testimonial.guestName = guestName;
     if (rating) testimonial.rating = rating;
     if (quote) testimonial.quote = quote;
     if (isFeatured !== undefined) testimonial.isFeatured = isFeatured === 'true' || isFeatured === true;
+    if (status) testimonial.status = status;
 
     if (req.file) {
       const result = await imagekit.upload({

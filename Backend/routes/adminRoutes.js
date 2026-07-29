@@ -1,6 +1,7 @@
 const express = require('express');
 const { requireAuth } = require('@clerk/express');
 const User = require('../models/User');
+const Setting = require('../models/Setting');
 
 const router = express.Router();
 
@@ -23,6 +24,31 @@ router.get('/check', requireAuth(), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ isAdmin: false });
+  }
+});
+
+router.get('/settings', requireAuth(), async (req, res) => {
+  try {
+    const settings = await Setting.find({});
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching settings' });
+  }
+});
+
+router.post('/settings', requireAuth(), async (req, res) => {
+  try {
+    const { key, value } = req.body;
+    let setting = await Setting.findOne({ key });
+    if (setting) {
+      setting.value = value;
+      await setting.save();
+    } else {
+      setting = await Setting.create({ key, value });
+    }
+    res.json(setting);
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating setting' });
   }
 });
 

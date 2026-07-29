@@ -1,6 +1,7 @@
 const Reservation = require('../models/Reservation');
 const Table = require('../models/Table');
 const sendEmail = require('../utils/sendEmail');
+const generateEmailTemplate = require('../utils/emailTemplate');
 
 // Helper function to check availability
 const checkAvailability = async (date, timeSlot, partySize) => {
@@ -58,9 +59,9 @@ const getAvailability = async (req, res, next) => {
 // @desc    Create a reservation
 // @route   POST /api/reservations
 // @access  Private
-const createReservation = async (req, res, next) => {
+  const createReservation = async (req, res, next) => {
   try {
-    const { date, timeSlot, partySize, guestName, guestPhone, specialRequest, tableId } = req.body;
+    const { date, timeSlot, partySize, guestName, guestPhone, guestEmail, specialRequest, tableId } = req.body;
 
     const targetDate = new Date(date);
     targetDate.setUTCHours(0, 0, 0, 0);
@@ -83,6 +84,7 @@ const createReservation = async (req, res, next) => {
       user: req.user._id,
       table: tableToBook._id,
       guestName: guestName || req.user.name,
+      guestEmail: guestEmail || req.user.email,
       guestPhone,
       date: targetDate,
       timeSlot,
@@ -91,16 +93,18 @@ const createReservation = async (req, res, next) => {
     });
 
     // Send confirmation email asynchronously
-    const emailMessage = `
-      <h1>Reservation Pending</h1>
-      <p>Dear ${reservation.guestName},</p>
-      <p>Your reservation request for <strong>${targetDate.toDateString()}</strong> at <strong>${timeSlot}</strong> for <strong>${partySize} people</strong> has been received and is currently Pending.</p>
-      <p>We will send another email once it is Confirmed.</p>
-    `;
+    const htmlContent = generateEmailTemplate(
+      'Reservation Pending',
+      `
+        <p>Dear ${reservation.guestName},</p>
+        <p>Your reservation request for <strong>${targetDate.toDateString()}</strong> at <strong>${timeSlot}</strong> for <strong>${partySize} guests</strong> has been received.</p>
+        <p>Your request is currently <strong>Pending</strong> review by our staff. We will send another email to confirm your reservation shortly.</p>
+      `
+    );
     sendEmail({
-      email: req.user.email,
+      email: reservation.guestEmail || req.user.email,
       subject: 'Yummy - Reservation Request Received',
-      message: emailMessage
+      message: htmlContent
     }).catch(e => console.error("Email failed:", e));
 
     // Notify admin asynchronously
@@ -222,20 +226,28 @@ const updateReservationStatus = async (req, res, next) => {
     }
 
     reservation.status = status;
+    if (status === 'Completed' && !reservation.completedAt) {
+      reservation.completedAt = new Date();
+    }
     await reservation.save();
 
     // Send email on status change
-    if (['Confirmed', 'Cancelled'].includes(status) && reservation.user) {
-      const emailMessage = `
-        <h1>Reservation ${status}</h1>
-        <p>Dear ${reservation.guestName || reservation.user.name},</p>
-        <p>Your reservation for <strong>${new Date(reservation.date).toDateString()}</strong> at <strong>${reservation.timeSlot}</strong> has been <strong>${status}</strong>.</p>
-      `;
-      await sendEmail({
-        email: reservation.user.email,
+    if (reservation.user || reservation.guestEmail) {
+      const htmlContent = generateEmailTemplate(
+        `Reservation ${status}`,
+        `
+          <p>Dear ${reservation.guestName || reservation.user.name},</p>
+          <p>This is an update regarding your reservation for <strong>${new Date(reservation.date).toDateString()}</strong> at <strong>${reservation.timeSlot}</strong>.</p>
+          <p>Your reservation status is now: <strong>${status}</strong>.</p>
+          ${status === 'Confirmed' ? '<p>We look forward to hosting you for an unforgettable culinary experience.</p>' : ''}
+          ${status === 'Cancelled' ? '<p>If you have any questions, please contact our support team.</p>' : ''}
+        `
+      );
+      sendEmail({
+        email: reservation.guestEmail || reservation.user.email,
         subject: `Yummy - Reservation ${status}`,
-        message: emailMessage
-      });
+        message: htmlContent
+      }).catch(e => console.error("Email failed:", e));
     }
 
     res.json(reservation);
