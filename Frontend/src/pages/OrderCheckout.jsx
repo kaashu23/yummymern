@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import toast from 'react-hot-toast';
 
 const OrderCheckout = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { getToken } = useAuth();
@@ -13,8 +15,10 @@ const OrderCheckout = () => {
   const handlePayment = async (e) => {
     e.preventDefault();
     if (cart.length === 0) return toast.error("Cart is empty");
+    if (isProcessing) return;
     
     try {
+      setIsProcessing(true);
       toast.loading("Processing order...", { id: 'checkout' });
       const token = await getToken();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -70,6 +74,8 @@ const OrderCheckout = () => {
     } catch (error) {
       console.error(error);
       toast.error("An error occurred during checkout", { id: 'checkout' });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -126,8 +132,8 @@ const OrderCheckout = () => {
             </div>
           </div>
 
-          <button type="submit" className="w-full py-5 bg-white text-[#050505] text-xs uppercase tracking-[0.2em] font-bold rounded-full hover:bg-[#c5a059] hover:text-white transition-colors duration-500 mt-8">
-            Pay ₹{total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} with Stripe
+          <button type="submit" disabled={isProcessing} className={`w-full py-5 bg-white text-[#050505] text-xs uppercase tracking-[0.2em] font-bold rounded-full transition-colors duration-500 mt-8 ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#c5a059] hover:text-white'}`}>
+            {isProcessing ? "Processing..." : `Pay ₹${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} with Stripe`}
           </button>
         </motion.form>
       </div>
