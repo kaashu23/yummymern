@@ -1,4 +1,10 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// Force IPv4 DNS resolution globally to prevent Render ENETUNREACH IPv6 errors
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 const sendEmail = async (options) => {
   try {
@@ -9,9 +15,7 @@ const sendEmail = async (options) => {
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-      },
-      // IMPORTANT: Forces nodemailer to use IPv4. Render's network sometimes fails to route IPv6 (ENETUNREACH)
-      family: 4 
+      }
     });
 
     const mailOptions = {

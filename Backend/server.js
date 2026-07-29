@@ -20,6 +20,7 @@ connectDB();
 initCron();
 
 const app = express();
+app.set('trust proxy', 1); // Trust the reverse proxy (e.g., Render)
 
 // Set security HTTP headers
 app.use(helmet());
