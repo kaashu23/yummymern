@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminTables = () => {
   const [tables, setTables] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { getToken } = useAuth();
@@ -18,12 +19,15 @@ const AdminTables = () => {
 
   const fetchTables = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/tables`);
       const data = await res.json();
       setTables(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,24 +130,40 @@ const AdminTables = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
-        {tables.map((table) => (
-          <div key={table._id} className={`p-6 rounded-2xl border transition-colors flex flex-col ${table.isActive !== false ? 'bg-[#0a0a0a] border-white/10 hover:border-[#c5a059]/50' : 'bg-red-950/10 border-red-900/30'}`}>
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="font-['EB_Garamond'] text-2xl text-white/90">{table.tableNumber}</h3>
-              <span className={`text-[9px] uppercase tracking-widest px-2 py-1 rounded-full ${table.isActive !== false ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
-                {table.isActive !== false ? 'Active' : 'Offline'}
-              </span>
+        {loading ? (
+          [1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="p-6 rounded-2xl border border-white/5 bg-[#0a0a0a] flex flex-col animate-pulse min-h-[160px]">
+              <div className="flex justify-between items-start mb-4">
+                <div className="h-6 w-16 bg-white/10 rounded"></div>
+                <div className="h-4 w-12 bg-white/5 rounded-full"></div>
+              </div>
+              <div className="h-3 w-24 bg-white/5 rounded mb-2 mt-auto"></div>
+              <div className="h-3 w-32 bg-white/5 rounded mb-4"></div>
+              <div className="flex justify-between border-t border-white/5 pt-4">
+                <div className="h-3 w-10 bg-white/10 rounded"></div>
+                <div className="h-3 w-12 bg-white/10 rounded"></div>
+              </div>
             </div>
-            <p className="text-sm text-white/50 font-light mb-1 flex-grow"><span className="text-white/30 mr-2 text-xs uppercase">Capacity</span> {table.capacity} Guests</p>
-            <p className="text-sm text-white/50 font-light mb-4"><span className="text-white/30 mr-2 text-xs uppercase">Location</span> {table.location}</p>
-            <div className="mt-auto flex justify-between border-t border-white/5 pt-4">
-              <button onClick={() => handleOpenEdit(table)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
-              <button onClick={() => handleDelete(table._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
-            </div>
-          </div>
-        ))}
-        {tables.length === 0 && (
+          ))
+        ) : tables.length === 0 ? (
           <div className="col-span-full p-8 text-center text-white/50">No tables found.</div>
+        ) : (
+          tables.map((table) => (
+            <div key={table._id} className={`p-6 rounded-2xl border transition-colors flex flex-col ${table.isActive !== false ? 'bg-[#0a0a0a] border-white/10 hover:border-[#c5a059]/50' : 'bg-red-950/10 border-red-900/30'}`}>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="font-['EB_Garamond'] text-2xl text-white/90">{table.tableNumber}</h3>
+                <span className={`text-[9px] uppercase tracking-widest px-2 py-1 rounded-full ${table.isActive !== false ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
+                  {table.isActive !== false ? 'Active' : 'Offline'}
+                </span>
+              </div>
+              <p className="text-sm text-white/50 font-light mb-1 flex-grow"><span className="text-white/30 mr-2 text-xs uppercase">Capacity</span> {table.capacity} Guests</p>
+              <p className="text-sm text-white/50 font-light mb-4"><span className="text-white/30 mr-2 text-xs uppercase">Location</span> {table.location}</p>
+              <div className="mt-auto flex justify-between border-t border-white/5 pt-4">
+                <button onClick={() => handleOpenEdit(table)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
+                <button onClick={() => handleDelete(table._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+              </div>
+            </div>
+          ))
         )}
       </motion.div>
 

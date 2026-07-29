@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminGallery = () => {
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { getToken } = useAuth();
   
@@ -16,12 +17,15 @@ const AdminGallery = () => {
 
   const fetchImages = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/gallery`);
       const data = await res.json();
       setImages(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,19 +120,24 @@ const AdminGallery = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
-        {images.map((img) => (
-          <div key={img._id} className="relative aspect-square rounded-xl overflow-hidden group bg-white/5 border border-white/10">
-            <img src={img.image} alt={img.caption} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 z-10">
-              <button onClick={() => handleDelete(img._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest bg-black/50 px-3 py-2 rounded">Delete</button>
-            </div>
-            <div className="absolute bottom-2 left-2 z-20">
-              <span className="text-[8px] uppercase tracking-widest bg-black/50 text-[#c5a059] px-2 py-1 rounded backdrop-blur-sm">{img.category || 'Food'}</span>
-            </div>
-          </div>
-        ))}
-        {images.length === 0 && (
+        {loading ? (
+          [1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-white/10 animate-pulse border border-white/5"></div>
+          ))
+        ) : images.length === 0 ? (
           <div className="col-span-full p-8 text-center text-white/50">No images found.</div>
+        ) : (
+          images.map((img) => (
+            <div key={img._id} className="relative aspect-square rounded-xl overflow-hidden group bg-white/5 border border-white/10">
+              <img src={img.image} alt={img.caption} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 z-10">
+                <button onClick={() => handleDelete(img._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest bg-black/50 px-3 py-2 rounded">Delete</button>
+              </div>
+              <div className="absolute bottom-2 left-2 z-20">
+                <span className="text-[8px] uppercase tracking-widest bg-black/50 text-[#c5a059] px-2 py-1 rounded backdrop-blur-sm">{img.category || 'Food'}</span>
+              </div>
+            </div>
+          ))
         )}
       </motion.div>
 

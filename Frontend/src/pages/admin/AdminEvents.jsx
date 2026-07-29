@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminEvents = () => {
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { getToken } = useAuth();
@@ -22,12 +23,15 @@ const AdminEvents = () => {
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/events`);
       const data = await res.json();
       setEvents(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -145,30 +149,46 @@ const AdminEvents = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        {events.map((event) => (
-          <div key={event._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex gap-4 items-start">
-            {event.image && (
-               <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                 <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-               </div>
-            )}
-            <div className="flex-grow">
-              <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-2">{event.title}</h3>
-              <p className="text-sm font-light text-white/50 mb-1">
-                {event.date ? new Date(event.date).toLocaleDateString() : ''} {event.time ? `• ${event.time}` : ''}
-              </p>
-              <p className="text-sm font-light text-white/50 mb-4">
-                Seats: {event.seatsAvailable} | Price: ₹{event.price || 0}
-              </p>
-              <div className="flex gap-4">
-                <button onClick={() => handleOpenEdit(event)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
-                <button onClick={() => handleDelete(event._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+        {loading ? (
+          [1, 2, 3, 4].map(i => (
+            <div key={i} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex gap-4 items-start animate-pulse min-h-[160px]">
+              <div className="w-24 h-24 rounded-lg bg-white/10 flex-shrink-0"></div>
+              <div className="flex-grow">
+                <div className="h-6 w-48 bg-white/10 rounded mb-4"></div>
+                <div className="h-4 w-32 bg-white/5 rounded mb-2"></div>
+                <div className="h-4 w-40 bg-white/5 rounded mb-6"></div>
+                <div className="flex gap-4">
+                  <div className="h-4 w-8 bg-white/10 rounded"></div>
+                  <div className="h-4 w-12 bg-white/10 rounded"></div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {events.length === 0 && (
+          ))
+        ) : events.length === 0 ? (
           <div className="col-span-full p-8 text-center text-white/50">No events found.</div>
+        ) : (
+          events.map((event) => (
+            <div key={event._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex gap-4 items-start">
+              {event.image && (
+                 <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                   <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                 </div>
+              )}
+              <div className="flex-grow">
+                <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-2">{event.title}</h3>
+                <p className="text-sm font-light text-white/50 mb-1">
+                  {event.date ? new Date(event.date).toLocaleDateString() : ''} {event.time ? `• ${event.time}` : ''}
+                </p>
+                <p className="text-sm font-light text-white/50 mb-4">
+                  Seats: {event.seatsAvailable} | Price: ₹{event.price || 0}
+                </p>
+                <div className="flex gap-4">
+                  <button onClick={() => handleOpenEdit(event)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
+                  <button onClick={() => handleDelete(event._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+                </div>
+              </div>
+            </div>
+          ))
         )}
       </motion.div>
 

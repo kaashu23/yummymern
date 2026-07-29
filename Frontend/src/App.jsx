@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
@@ -16,6 +17,7 @@ import Events from './pages/Events';
 import Chefs from './pages/Chefs';
 import Contact from './pages/Contact';
 import LeaveReview from './pages/LeaveReview';
+import NotFound from './pages/NotFound';
 
 // Admin Imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -44,37 +46,40 @@ function App() {
       {!isAdmin && <Navbar />}
       
       <main className={isAdmin ? 'h-screen' : 'min-h-screen bg-[#050505]'}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<Menu />} />
-          <Route path="/menu/:id" element={<MenuItemDetail />} />
-          <Route path="/reservation" element={<Reservation />} />
-          <Route path="/my-reservations" element={<MyReservations />} />
-          <Route path="/order-online" element={<OrderOnline />} />
-          <Route path="/order-checkout" element={<OrderCheckout />} />
-          <Route path="/my-orders" element={<MyOrders />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/chefs" element={<Chefs />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/leave-review" element={<LeaveReview />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="reservations" element={<AdminReservations />} />
-            <Route path="tables" element={<AdminTables />} />
-            <Route path="menu" element={<AdminMenu />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="events" element={<AdminEvents />} />
-            <Route path="chefs" element={<AdminChefs />} />
-            <Route path="gallery" element={<AdminGallery />} />
-            <Route path="testimonials" element={<AdminTestimonials />} />
-            <Route path="messages" element={<AdminMessages />} />
-          </Route>
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
+            <Route path="/menu" element={<PageWrapper><Menu /></PageWrapper>} />
+            <Route path="/menu/:id" element={<PageWrapper><MenuItemDetail /></PageWrapper>} />
+            <Route path="/reservation" element={<PageWrapper><Reservation /></PageWrapper>} />
+            <Route path="/my-reservations" element={<PageWrapper><MyReservations /></PageWrapper>} />
+            <Route path="/order-online" element={<PageWrapper><OrderOnline /></PageWrapper>} />
+            <Route path="/order-checkout" element={<PageWrapper><OrderCheckout /></PageWrapper>} />
+            <Route path="/my-orders" element={<PageWrapper><MyOrders /></PageWrapper>} />
+            <Route path="/about" element={<PageWrapper><About /></PageWrapper>} />
+            <Route path="/gallery" element={<PageWrapper><Gallery /></PageWrapper>} />
+            <Route path="/events" element={<PageWrapper><Events /></PageWrapper>} />
+            <Route path="/chefs" element={<PageWrapper><Chefs /></PageWrapper>} />
+            <Route path="/contact" element={<PageWrapper><Contact /></PageWrapper>} />
+            <Route path="/leave-review" element={<PageWrapper><LeaveReview /></PageWrapper>} />
+            <Route path="*" element={<PageWrapper><NotFound /></PageWrapper>} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="reservations" element={<AdminReservations />} />
+              <Route path="tables" element={<AdminTables />} />
+              <Route path="menu" element={<AdminMenu />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="events" element={<AdminEvents />} />
+              <Route path="chefs" element={<AdminChefs />} />
+              <Route path="gallery" element={<AdminGallery />} />
+              <Route path="testimonials" element={<AdminTestimonials />} />
+              <Route path="messages" element={<AdminMessages />} />
+            </Route>
+          </Routes>
+        </AnimatePresence>
       </main>
       
       <Footer />
@@ -82,5 +87,16 @@ function App() {
     </div>
   );
 }
+
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    {children}
+  </motion.div>
+);
 
 export default App;

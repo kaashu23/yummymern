@@ -113,6 +113,7 @@ exports.getOrders = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateOrderStatus = async (req, res, next) => {
   try {
+    const { status } = req.body;
     const updateData = { status };
     if (status === 'delivered') {
       updateData.completedAt = new Date();

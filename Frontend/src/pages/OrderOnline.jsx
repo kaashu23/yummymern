@@ -63,11 +63,20 @@ const OrderOnline = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex justify-center items-center h-64"
+                className="flex flex-col gap-8"
               >
-                <div className="font-['EB_Garamond'] text-2xl italic text-[#c5a059] animate-pulse">
-                  Loading menu...
-                </div>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex justify-between items-center p-6 border border-white/5 bg-[#0a0a0a] rounded-2xl animate-pulse">
+                    <div className="flex flex-col gap-3 w-full max-w-md">
+                      <div className="h-6 w-48 bg-white/10 rounded"></div>
+                      <div className="h-3 w-3/4 bg-white/5 rounded mt-1"></div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="h-6 w-16 bg-[#c5a059]/20 rounded"></div>
+                      <div className="w-10 h-10 rounded-full bg-white/5"></div>
+                    </div>
+                  </div>
+                ))}
               </motion.div>
             ) : (
               <motion.div key="menuList" className="flex flex-col gap-8">

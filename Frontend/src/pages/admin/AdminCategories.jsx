@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { getToken } = useAuth();
@@ -15,12 +16,15 @@ const AdminCategories = () => {
 
   const fetchCategories = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/categories`);
       const data = await res.json();
       setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,17 +124,28 @@ const AdminCategories = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        {categories.map((cat) => (
-          <div key={cat._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 hover:border-[#c5a059]/50 transition-colors flex justify-between items-center">
-            <h3 className="font-['EB_Garamond'] text-2xl text-white/90">{cat.name}</h3>
-            <div className="flex gap-4">
-              <button onClick={() => handleOpenEdit(cat)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
-              <button onClick={() => handleDelete(cat._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+        {loading ? (
+          [1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex justify-between items-center animate-pulse min-h-[80px]">
+              <div className="h-6 w-32 bg-white/10 rounded"></div>
+              <div className="flex gap-4">
+                <div className="h-4 w-8 bg-white/10 rounded"></div>
+                <div className="h-4 w-10 bg-white/10 rounded"></div>
+              </div>
             </div>
-          </div>
-        ))}
-        {categories.length === 0 && (
+          ))
+        ) : categories.length === 0 ? (
           <div className="col-span-full p-8 text-center text-white/50">No categories found.</div>
+        ) : (
+          categories.map((cat) => (
+            <div key={cat._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 hover:border-[#c5a059]/50 transition-colors flex justify-between items-center">
+              <h3 className="font-['EB_Garamond'] text-2xl text-white/90">{cat.name}</h3>
+              <div className="flex gap-4">
+                <button onClick={() => handleOpenEdit(cat)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
+                <button onClick={() => handleDelete(cat._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+              </div>
+            </div>
+          ))
         )}
       </motion.div>
 

@@ -148,7 +148,7 @@ const Reservation = () => {
           </header>
           
           <div className="p-8 bg-[#0a0a0a] rounded-2xl border border-white/5 flex flex-col gap-8 shadow-2xl">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Date</label>
                 <input 
@@ -177,7 +177,7 @@ const Reservation = () => {
             </div>
             <div className="flex flex-col gap-4">
               <label className="text-[10px] uppercase tracking-[0.2em] text-white/40">Preferred Time Slot</label>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {(() => {
                   const todayStr = getLocalYYYYMMDD();
                   const validSlots = ['18:00', '19:30', '21:00'].filter(timeStr => {
@@ -243,15 +243,15 @@ const Reservation = () => {
             
             {/* Table Map */}
             {isMapActive && (
-              <div className="w-full overflow-x-auto pb-4 hide-scrollbar">
+              <div className="w-full">
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.8 }}
-                  className="flex-grow grid grid-cols-4 grid-rows-4 gap-4 min-w-[500px]"
+                  className="flex flex-col lg:grid lg:grid-cols-4 lg:grid-rows-4 gap-4"
                 >
                   {/* Rooftop */}
-                  <div className="col-span-2 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative group bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                  <div className="lg:col-span-2 lg:row-span-2 p-6 md:p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative group bg-white/[0.02] hover:bg-white/[0.04] transition-colors min-h-[120px]">
                     <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Rooftop</div>
                     <div 
                       className={`w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-300 ${
@@ -265,9 +265,9 @@ const Reservation = () => {
                   </div>
                   
                   {/* Terrace */}
-                  <div className="col-span-2 row-span-1 p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
-                    <div className="absolute top-2 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Terrace</div>
-                    <div className="flex gap-4 w-full justify-center mt-2">
+                  <div className="lg:col-span-2 lg:row-span-1 p-6 md:p-4 border border-white/5 rounded-xl flex flex-col justify-center items-center relative bg-white/[0.02] hover:bg-white/[0.04] transition-colors min-h-[100px]">
+                    <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Terrace</div>
+                    <div className="flex gap-4 w-full justify-center mt-6 lg:mt-2">
                       {[8, 9].map((tNum) => (
                         <div 
                           key={tNum}
@@ -284,9 +284,9 @@ const Reservation = () => {
                   </div>
                   
                   {/* Main Hall */}
-                  <div className="col-span-4 row-span-2 p-4 border border-white/5 rounded-xl flex flex-col relative bg-white/[0.02]">
+                  <div className="lg:col-span-4 lg:row-span-2 p-6 md:p-4 border border-white/5 rounded-xl flex flex-col relative bg-white/[0.02] min-h-[160px]">
                     <div className="absolute top-4 left-4 text-[9px] uppercase tracking-[0.3em] text-white/30">Main Dining Hall</div>
-                    <div className="grid grid-cols-6 gap-4 mt-8">
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-12 lg:mt-8">
                       {[1, 2, 3, 4, 5, 6].map((tNum) => (
                         <div 
                           key={tNum}
@@ -304,7 +304,7 @@ const Reservation = () => {
                   </div>
 
                   {/* Chef's Table */}
-                  <div className="col-span-2 row-span-1 p-4 border border-[#c5a059]/20 bg-[#c5a059]/5 rounded-xl flex items-center justify-between">
+                  <div className="lg:col-span-2 lg:row-span-1 p-6 md:p-4 border border-[#c5a059]/20 bg-[#c5a059]/5 rounded-xl flex items-center justify-between min-h-[100px]">
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase tracking-[0.3em] text-[#c5a059]">Chef's Table</span>
                       <span className="text-[10px] text-white/40 italic font-['EB_Garamond']">Exclusive selection</span>

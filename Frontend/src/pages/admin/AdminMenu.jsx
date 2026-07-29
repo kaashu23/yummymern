@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminMenu = () => {
   const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -20,12 +21,15 @@ const AdminMenu = () => {
 
   const fetchItems = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/menu`);
       const data = await res.json();
       setMenuItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -186,28 +190,39 @@ const AdminMenu = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {sortedMenuItems.map((item, idx) => (
-                <tr key={item._id || idx} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-8 py-6">
-                    <div className="text-sm text-white/90">{item.name}</div>
-                  </td>
-                  <td className="px-8 py-6 text-sm text-white/60">{item.category?.name || 'Uncategorized'}</td>
-                  <td className="px-8 py-6 text-sm text-white/60">₹{item.price}</td>
-                  <td className="px-8 py-6">
-                    <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest ${item.isAvailable ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
-                      {item.isAvailable ? 'Available' : "86'd"}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <button onClick={() => handleOpenEdit(item)} className="text-xs text-[#c5a059] hover:text-white mr-4 transition-colors">Edit</button>
-                    <button onClick={() => handleDelete(item._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
-                  </td>
-                </tr>
-              ))}
-              {menuItems.length === 0 && (
+              {loading ? (
+                [1, 2, 3, 4, 5].map(i => (
+                  <tr key={i} className="animate-pulse border-b border-white/5">
+                    <td className="px-8 py-6"><div className="h-4 w-32 bg-white/10 rounded"></div></td>
+                    <td className="px-8 py-6"><div className="h-4 w-24 bg-white/10 rounded"></div></td>
+                    <td className="px-8 py-6"><div className="h-4 w-16 bg-white/10 rounded"></div></td>
+                    <td className="px-8 py-6"><div className="h-6 w-20 bg-white/10 rounded-full"></div></td>
+                    <td className="px-8 py-6 text-right"><div className="h-4 w-24 bg-white/10 rounded inline-block"></div></td>
+                  </tr>
+                ))
+              ) : menuItems.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-8 py-6 text-center text-sm text-white/50">No menu items found.</td>
                 </tr>
+              ) : (
+                sortedMenuItems.map((item, idx) => (
+                  <tr key={item._id || idx} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-8 py-6">
+                      <div className="text-sm text-white/90">{item.name}</div>
+                    </td>
+                    <td className="px-8 py-6 text-sm text-white/60">{item.category?.name || 'Uncategorized'}</td>
+                    <td className="px-8 py-6 text-sm text-white/60">₹{item.price}</td>
+                    <td className="px-8 py-6">
+                      <span className={`px-3 py-1 rounded-full text-[9px] uppercase tracking-widest ${item.isAvailable ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
+                        {item.isAvailable ? 'Available' : "86'd"}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <button onClick={() => handleOpenEdit(item)} className="text-xs text-[#c5a059] hover:text-white mr-4 transition-colors">Edit</button>
+                      <button onClick={() => handleDelete(item._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

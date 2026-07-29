@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminChefs = () => {
   const [chefs, setChefs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const { getToken } = useAuth();
@@ -18,12 +19,15 @@ const AdminChefs = () => {
 
   const fetchChefs = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/chefs`);
       const data = await res.json();
       setChefs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -128,21 +132,34 @@ const AdminChefs = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        {chefs.map((chef, idx) => (
-          <div key={chef._id || idx} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col items-center text-center">
-            <div className="w-24 h-24 rounded-full bg-white/10 mb-4 overflow-hidden border border-white/20">
-              {chef.photo && <img src={chef.photo} alt={chef.name} className="w-full h-full object-cover" />}
+        {loading ? (
+          [1, 2, 3].map(i => (
+            <div key={i} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col items-center text-center animate-pulse min-h-[220px]">
+              <div className="w-24 h-24 rounded-full bg-white/10 mb-4"></div>
+              <div className="h-6 w-32 bg-white/10 rounded mb-2"></div>
+              <div className="h-3 w-20 bg-white/5 rounded mb-6"></div>
+              <div className="w-full flex justify-between border-t border-white/10 pt-4 mt-auto">
+                <div className="h-4 w-8 bg-white/10 rounded"></div>
+                <div className="h-4 w-12 bg-white/10 rounded"></div>
+              </div>
             </div>
-            <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-1">{chef.name}</h3>
-            <p className="text-[10px] uppercase tracking-widest text-[#c5a059] mb-6">{chef.role}</p>
-            <div className="w-full flex justify-between border-t border-white/10 pt-4">
-              <button onClick={() => handleOpenEdit(chef)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
-              <button onClick={() => handleDelete(chef._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
-            </div>
-          </div>
-        ))}
-        {chefs.length === 0 && (
+          ))
+        ) : chefs.length === 0 ? (
           <div className="col-span-full p-8 text-center text-white/50">No chefs found.</div>
+        ) : (
+          chefs.map((chef, idx) => (
+            <div key={chef._id || idx} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full bg-white/10 mb-4 overflow-hidden border border-white/20">
+                {chef.photo && <img src={chef.photo} alt={chef.name} className="w-full h-full object-cover" />}
+              </div>
+              <h3 className="font-['EB_Garamond'] text-2xl text-white/90 mb-1">{chef.name}</h3>
+              <p className="text-[10px] uppercase tracking-widest text-[#c5a059] mb-6">{chef.role}</p>
+              <div className="w-full flex justify-between border-t border-white/10 pt-4 mt-auto">
+                <button onClick={() => handleOpenEdit(chef)} className="text-xs text-[#c5a059] hover:text-white transition-colors">Edit</button>
+                <button onClick={() => handleDelete(chef._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+              </div>
+            </div>
+          ))
         )}
       </motion.div>
 

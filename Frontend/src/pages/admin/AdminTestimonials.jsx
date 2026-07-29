@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 
 const AdminTestimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [activeTab, setActiveTab] = useState('Featured');
@@ -21,12 +22,15 @@ const AdminTestimonials = () => {
 
   const fetchTestimonials = async () => {
     try {
+      setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/testimonials`);
       const data = await res.json();
       setTestimonials(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -255,44 +259,70 @@ const AdminTestimonials = () => {
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        {testimonials.filter(t => activeTab === 'Pending' ? t.status === 'Pending' : t.status !== 'Pending').map((review) => (
-          <div key={review._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col justify-between">
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  {review.photo && (
-                    <div className="w-10 h-10 rounded-full overflow-hidden">
-                      <img src={review.photo} alt={review.guestName} className="w-full h-full object-cover" />
+        {loading ? (
+          [1, 2, 3, 4].map(i => (
+            <div key={i} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col justify-between animate-pulse min-h-[220px]">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/10"></div>
+                    <div>
+                      <div className="h-5 w-24 bg-white/10 rounded mb-1"></div>
+                      <div className="h-3 w-16 bg-white/5 rounded"></div>
                     </div>
-                  )}
-                  <div>
-                    <h3 className="font-['EB_Garamond'] text-xl text-white/90">{review.guestName}</h3>
-                    <div className="text-[#c5a059] text-xs">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</div>
                   </div>
                 </div>
-                {review.isFeatured && (
-                  <span className="text-[9px] uppercase tracking-widest text-[#c5a059] bg-[#c5a059]/10 px-3 py-1 rounded-full">Featured</span>
-                )}
+                <div className="space-y-2 mb-6">
+                  <div className="h-3 w-full bg-white/5 rounded"></div>
+                  <div className="h-3 w-4/5 bg-white/5 rounded"></div>
+                  <div className="h-3 w-2/3 bg-white/5 rounded"></div>
+                </div>
               </div>
-              <p className="text-sm font-light text-white/50 italic mb-6">"{review.quote}"</p>
+              <div className="flex justify-end gap-4 border-t border-white/10 pt-4 flex-wrap">
+                <div className="h-4 w-8 bg-white/10 rounded"></div>
+                <div className="h-4 w-12 bg-white/10 rounded"></div>
+              </div>
             </div>
-            <div className="flex justify-end gap-4 border-t border-white/10 pt-4 flex-wrap">
-              {review.status === 'Pending' && (
-                <>
-                  <button onClick={() => handleUpdateStatus(review._id, 'Approved')} className="text-xs text-green-400 hover:text-green-300 transition-colors">Approve</button>
-                  <button onClick={() => handleUpdateStatus(review._id, 'Rejected')} className="text-xs text-red-400 hover:text-red-300 transition-colors">Reject</button>
-                </>
-              )}
-              {review.status === 'Approved' && (
-                <button onClick={() => handleToggleFeatured(review._id, review.isFeatured)} className="text-xs text-[#c5a059] hover:text-white transition-colors">{review.isFeatured ? 'Unfeature' : 'Feature'}</button>
-              )}
-              <button onClick={() => handleOpenEdit(review)} className="text-xs text-white/60 hover:text-white transition-colors">Edit</button>
-              <button onClick={() => handleDelete(review._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
-            </div>
-          </div>
-        ))}
-        {testimonials.filter(t => activeTab === 'Pending' ? t.status === 'Pending' : t.status !== 'Pending').length === 0 && (
+          ))
+        ) : testimonials.filter(t => activeTab === 'Pending' ? t.status === 'Pending' : t.status !== 'Pending').length === 0 ? (
           <div className="col-span-full p-8 text-center text-white/50">No {activeTab.toLowerCase()} testimonials found.</div>
+        ) : (
+          testimonials.filter(t => activeTab === 'Pending' ? t.status === 'Pending' : t.status !== 'Pending').map((review) => (
+            <div key={review._id} className="p-6 rounded-2xl bg-[#0a0a0a] border border-white/5 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex items-center gap-3">
+                    {review.photo && (
+                      <div className="w-10 h-10 rounded-full overflow-hidden">
+                        <img src={review.photo} alt={review.guestName} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-['EB_Garamond'] text-xl text-white/90">{review.guestName}</h3>
+                      <div className="text-[#c5a059] text-xs">{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)}</div>
+                    </div>
+                  </div>
+                  {review.isFeatured && (
+                    <span className="text-[9px] uppercase tracking-widest text-[#c5a059] bg-[#c5a059]/10 px-3 py-1 rounded-full">Featured</span>
+                  )}
+                </div>
+                <p className="text-sm font-light text-white/50 italic mb-6">"{review.quote}"</p>
+              </div>
+              <div className="flex justify-end gap-4 border-t border-white/10 pt-4 flex-wrap">
+                {review.status === 'Pending' && (
+                  <>
+                    <button onClick={() => handleUpdateStatus(review._id, 'Approved')} className="text-xs text-green-400 hover:text-green-300 transition-colors">Approve</button>
+                    <button onClick={() => handleUpdateStatus(review._id, 'Rejected')} className="text-xs text-red-400 hover:text-red-300 transition-colors">Reject</button>
+                  </>
+                )}
+                {review.status === 'Approved' && (
+                  <button onClick={() => handleToggleFeatured(review._id, review.isFeatured)} className="text-xs text-[#c5a059] hover:text-white transition-colors">{review.isFeatured ? 'Unfeature' : 'Feature'}</button>
+                )}
+                <button onClick={() => handleOpenEdit(review)} className="text-xs text-white/60 hover:text-white transition-colors">Edit</button>
+                <button onClick={() => handleDelete(review._id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Delete</button>
+              </div>
+            </div>
+          ))
         )}
       </motion.div>
       )}

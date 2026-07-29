@@ -72,7 +72,21 @@ const MyOrders = () => {
           className="flex flex-col gap-6"
         >
           {orders.length === 0 ? (
-            <p className="text-white/40 font-light">No orders found.</p>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="bg-[#0a0a0a] border border-white/5 rounded-2xl p-12 text-center flex flex-col items-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined text-4xl text-white/20">receipt_long</span>
+              </div>
+              <h3 className="font-['EB_Garamond'] text-3xl text-white/90 mb-3">No Orders Yet</h3>
+              <p className="text-white/50 text-sm font-light max-w-sm mb-8">You haven't placed any orders with us. Explore our menu to find your next culinary delight.</p>
+              <a href="/order-online" className="font-['Manrope'] text-[10px] uppercase tracking-[0.2em] text-[#050505] bg-white px-8 py-4 rounded-full hover:bg-[#c5a059] hover:text-white transition-all duration-500 font-bold">
+                Browse Menu
+              </a>
+            </motion.div>
           ) : (
             orders.map((order, idx) => (
               <motion.div 

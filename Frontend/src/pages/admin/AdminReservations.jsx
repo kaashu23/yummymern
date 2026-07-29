@@ -5,11 +5,13 @@ import toast from 'react-hot-toast';
 
 const AdminReservations = () => {
   const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const { getToken } = useAuth();
 
   const fetchReservations = async () => {
     try {
+      setLoading(true);
       const token = await getToken();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/reservations`, {
@@ -21,6 +23,8 @@ const AdminReservations = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,34 +143,46 @@ const AdminReservations = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {sortedReservations.map((res) => (
-                <tr key={res._id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-6 text-xs text-white/40">{res._id.substring(0,8)}...</td>
-                  <td className="px-6 py-6 text-sm text-white/90">{res.guestName || (res.user && res.user.name) || 'Guest'}</td>
-                  <td className="px-6 py-6 text-sm text-white/60">{new Date(res.date).toLocaleDateString()} {res.timeSlot}</td>
-                  <td className="px-6 py-6 text-sm text-white/60">{res.partySize} Guests</td>
-                  <td className="px-6 py-6">
-                    <span className="px-3 py-1 rounded-full text-[9px] uppercase tracking-widest bg-white/5 text-white/70 border border-white/10">{res.status}</span>
-                  </td>
-                  <td className="px-6 py-6 text-right">
-                    <select 
-                      value={res.status}
-                      onChange={(e) => updateStatus(res._id, e.target.value)}
-                      className="bg-[#0a0a0a] border border-white/10 rounded px-2 py-1 text-xs text-white/70 focus:border-[#c5a059] outline-none"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Confirmed">Confirmed</option>
-                      <option value="Seated">Seated</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Cancelled">Cancelled</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-              {reservations.length === 0 && (
+              {loading ? (
+                [1, 2, 3, 4, 5].map(i => (
+                  <tr key={i} className="animate-pulse border-b border-white/5">
+                    <td className="px-6 py-6"><div className="h-4 w-12 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-4 w-24 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-4 w-32 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-4 w-16 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-6 w-20 bg-white/10 rounded-full"></div></td>
+                    <td className="px-6 py-6 text-right"><div className="h-8 w-24 bg-white/10 rounded inline-block"></div></td>
+                  </tr>
+                ))
+              ) : reservations.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-white/40">No reservations found.</td>
                 </tr>
+              ) : (
+                sortedReservations.map((res) => (
+                  <tr key={res._id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-6 text-xs text-white/40">{res._id.substring(0,8)}...</td>
+                    <td className="px-6 py-6 text-sm text-white/90">{res.guestName || (res.user && res.user.name) || 'Guest'}</td>
+                    <td className="px-6 py-6 text-sm text-white/60">{new Date(res.date).toLocaleDateString()} {res.timeSlot}</td>
+                    <td className="px-6 py-6 text-sm text-white/60">{res.partySize} Guests</td>
+                    <td className="px-6 py-6">
+                      <span className="px-3 py-1 rounded-full text-[9px] uppercase tracking-widest bg-white/5 text-white/70 border border-white/10">{res.status}</span>
+                    </td>
+                    <td className="px-6 py-6 text-right">
+                      <select 
+                        value={res.status}
+                        onChange={(e) => updateStatus(res._id, e.target.value)}
+                        className="bg-[#0a0a0a] border border-white/10 rounded px-2 py-1 text-xs text-white/70 focus:border-[#c5a059] outline-none"
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Seated">Seated</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>

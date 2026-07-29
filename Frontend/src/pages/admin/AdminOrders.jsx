@@ -5,11 +5,13 @@ import toast from 'react-hot-toast';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const { getToken } = useAuth();
 
   const fetchOrders = async () => {
     try {
+      setLoading(true);
       const token = await getToken();
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const res = await fetch(`${apiUrl}/orders`, {
@@ -21,6 +23,8 @@ const AdminOrders = () => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -117,35 +121,47 @@ const AdminOrders = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {sortedOrders.map((ord) => (
-                <tr key={ord._id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-6 text-xs text-white/40">{ord._id.substring(0, 8)}...</td>
-                  <td className="px-6 py-6 text-sm text-white/90">{ord.customerInfo?.name || 'Guest'}</td>
-                  <td className="px-6 py-6 text-sm text-white/60">{ord.orderType || 'delivery'}</td>
-                  <td className="px-6 py-6 text-sm text-white/90">₹{ord.totalAmount}</td>
-                  <td className="px-6 py-6">
-                    <span className="px-3 py-1 rounded-full text-[9px] uppercase tracking-widest bg-white/5 text-white/70 border border-white/10">{ord.status}</span>
-                  </td>
-                  <td className="px-6 py-6 text-right">
-                    <select 
-                      value={ord.status}
-                      onChange={(e) => updateStatus(ord._id, e.target.value)}
-                      className="bg-[#0a0a0a] border border-white/10 rounded px-2 py-1 text-xs text-white/70 focus:border-[#c5a059] outline-none"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="preparing">Preparing</option>
-                      <option value="ready">Ready</option>
-                      <option value="out_for_delivery">Out for Delivery</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-              {orders.length === 0 && (
+              {loading ? (
+                [1, 2, 3, 4, 5].map(i => (
+                  <tr key={i} className="animate-pulse border-b border-white/5">
+                    <td className="px-6 py-6"><div className="h-4 w-12 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-4 w-24 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-4 w-20 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-4 w-16 bg-white/10 rounded"></div></td>
+                    <td className="px-6 py-6"><div className="h-6 w-20 bg-white/10 rounded-full"></div></td>
+                    <td className="px-6 py-6 text-right"><div className="h-8 w-24 bg-white/10 rounded inline-block"></div></td>
+                  </tr>
+                ))
+              ) : orders.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-white/40">No orders found.</td>
                 </tr>
+              ) : (
+                sortedOrders.map((ord) => (
+                  <tr key={ord._id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-6 py-6 text-xs text-white/40">{ord._id.substring(0, 8)}...</td>
+                    <td className="px-6 py-6 text-sm text-white/90">{ord.customerInfo?.name || 'Guest'}</td>
+                    <td className="px-6 py-6 text-sm text-white/60">{ord.orderType || 'delivery'}</td>
+                    <td className="px-6 py-6 text-sm text-white/90">₹{ord.totalAmount}</td>
+                    <td className="px-6 py-6">
+                      <span className="px-3 py-1 rounded-full text-[9px] uppercase tracking-widest bg-white/5 text-white/70 border border-white/10">{ord.status}</span>
+                    </td>
+                    <td className="px-6 py-6 text-right">
+                      <select 
+                        value={ord.status}
+                        onChange={(e) => updateStatus(ord._id, e.target.value)}
+                        className="bg-[#0a0a0a] border border-white/10 rounded px-2 py-1 text-xs text-white/70 focus:border-[#c5a059] outline-none"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="preparing">Preparing</option>
+                        <option value="ready">Ready</option>
+                        <option value="out_for_delivery">Out for Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
