@@ -1,18 +1,24 @@
 const nodemailer = require('nodemailer');
-const dns = require('dns');
-
-// Force IPv4 DNS resolution globally to prevent Render ENETUNREACH IPv6 errors
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
 
 const sendEmail = async (options) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // Upgrades to secure via STARTTLS
+      requireTLS: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      // Force IPv4 lookup at the socket level to bypass Render IPv6 issues
+      lookup: (hostname, dnsOptions, callback) => {
+        require('dns').lookup(hostname, { family: 4 }, (err, address, family) => {
+          callback(err, address, family);
+        });
       }
     });
 
