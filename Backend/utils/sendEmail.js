@@ -10,7 +10,8 @@ const sendEmail = async (options) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
       },
-      debug: true, // Show debug output for troubleshooting
+      // IMPORTANT: Forces nodemailer to use IPv4. Render's network sometimes fails to route IPv6 (ENETUNREACH)
+      family: 4 
     });
 
     const mailOptions = {
