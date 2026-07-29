@@ -97,8 +97,8 @@ const MyReservations = () => {
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
                 <span className="material-symbols-outlined text-4xl text-white/20">event_seat</span>
               </div>
-              <h3 className="font-['EB_Garamond'] text-3xl text-white/90 mb-3">No Bookings Yet</h3>
-              <p className="text-white/50 text-sm font-light max-w-sm mb-8">You don't have any upcoming reservations. Book a table to secure your next experience.</p>
+              <h3 className="font-['EB_Garamond'] text-3xl md:text-4xl text-white/90 mb-4">No Bookings Yet</h3>
+              <p className="text-white/50 text-base md:text-lg font-light max-w-md mb-8">You don't have any upcoming reservations. Book a table to secure your next experience.</p>
               <a href="/reservation" className="font-['Manrope'] text-[10px] uppercase tracking-[0.2em] text-[#050505] bg-white px-8 py-4 rounded-full hover:bg-[#c5a059] hover:text-white transition-all duration-500 font-bold">
                 Book a Table
               </a>

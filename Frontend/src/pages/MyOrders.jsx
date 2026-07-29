@@ -81,8 +81,8 @@ const MyOrders = () => {
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
                 <span className="material-symbols-outlined text-4xl text-white/20">receipt_long</span>
               </div>
-              <h3 className="font-['EB_Garamond'] text-3xl text-white/90 mb-3">No Orders Yet</h3>
-              <p className="text-white/50 text-sm font-light max-w-sm mb-8">You haven't placed any orders with us. Explore our menu to find your next culinary delight.</p>
+              <h3 className="font-['EB_Garamond'] text-3xl md:text-4xl text-white/90 mb-4">No Orders Yet</h3>
+              <p className="text-white/50 text-base md:text-lg font-light max-w-md mb-8">You haven't placed any orders with us. Explore our menu to find your next culinary delight.</p>
               <a href="/order-online" className="font-['Manrope'] text-[10px] uppercase tracking-[0.2em] text-[#050505] bg-white px-8 py-4 rounded-full hover:bg-[#c5a059] hover:text-white transition-all duration-500 font-bold">
                 Browse Menu
               </a>
